@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "748835873318",
+    "project_id": "pkr-staff-salary-management",
+    "storage_bucket": "pkr-staff-salary-management.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748835873318:android:48888a5b146017f0ab3ce7",
+        "android_client_info": {
+          "package_name": "com.example.staff_salary_management"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3AZQy6RKorU2BpV-bqSaDIyYT86-GlxM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
