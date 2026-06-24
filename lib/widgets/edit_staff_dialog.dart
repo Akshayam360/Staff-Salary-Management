@@ -40,6 +40,12 @@ class _EditStaffDialogState
   late TextEditingController
   rdController;
 
+  late TextEditingController
+  odController;
+
+  late TextEditingController
+  tdsController;
+
   late bool pfEnabled;
   late bool esiEnabled;
 
@@ -78,6 +84,16 @@ class _EditStaffDialogState
         TextEditingController(
           text: widget.staff.rdAmount
               .toString(),
+        );
+
+    odController =
+        TextEditingController(
+          text: widget.staff.odDays.toString(),
+        );
+
+    tdsController =
+        TextEditingController(
+          text: widget.staff.tdsAmount.toString(),
         );
 
     pfEnabled =
@@ -244,6 +260,35 @@ class _EditStaffDialogState
                 ],
               ),
 
+              const SizedBox(height: 20),
+
+              Row(
+                children: [
+
+                  Expanded(
+                    child: TextField(
+                      controller: odController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'OD Days',
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 20),
+
+                  Expanded(
+                    child: TextField(
+                      controller: tdsController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'TDS Amount',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
               const SizedBox(
                   height: 25),
 
@@ -351,6 +396,15 @@ class _EditStaffDialogState
                         double.parse(
                           rdController
                               .text,
+                        ),
+                        odDays:
+                        int.parse(
+                          odController.text,
+                        ),
+
+                        tdsAmount:
+                        double.parse(
+                          tdsController.text,
                         ),
 
                         pfEnabled:

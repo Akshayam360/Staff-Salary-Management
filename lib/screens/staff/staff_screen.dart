@@ -77,7 +77,7 @@ class _StaffScreenState
   Widget build(BuildContext context) {
 
     return Padding(
-      padding: const EdgeInsets.all(100),
+      padding: const EdgeInsets.all(85),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -251,7 +251,7 @@ class _StaffScreenState
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                     child: DataTable(
-                      columnSpacing: 95,
+                      columnSpacing: 65,
                       horizontalMargin: 15,
 
                       headingRowHeight: 50,
@@ -284,9 +284,19 @@ class _StaffScreenState
                         DataColumn(
                           label: tableHeader('RD'),
                         ),
+
+                        DataColumn(
+                          label: tableHeader('OD'),
+                        ),
+
+                        DataColumn(
+                          label: tableHeader('TDS'),
+                        ),
+
                         DataColumn(
                           label: tableHeader('CL'),
                         ),
+
                         DataColumn(
                           label: tableHeader('ACTIONS'),
                         ),
@@ -328,7 +338,6 @@ class _StaffScreenState
                                     : '--',
                               ),
                             ),
-
                             DataCell(
                               Text(
                                 staff.esiEnabled
@@ -336,11 +345,24 @@ class _StaffScreenState
                                     : '--',
                               ),
                             ),
-
                             DataCell(
                               Text(
                                 staff.rdAmount > 0
                                     ? '₹${staff.rdAmount}'
+                                    : '--',
+                              ),
+                            ),
+
+                            DataCell(
+                              Text(
+                                '${staff.odDays}',
+                              ),
+                            ),
+
+                            DataCell(
+                              Text(
+                                staff.tdsAmount > 0
+                                    ? '₹${staff.tdsAmount}'
                                     : '--',
                               ),
                             ),
@@ -448,6 +470,18 @@ class _StaffScreenState
                                                     'RD Amount',
                                                     staff.rdAmount > 0
                                                         ? '₹${staff.rdAmount}'
+                                                        : '--',
+                                                  ),
+
+                                                  detailRow(
+                                                    'OD Days',
+                                                    '${staff.odDays}',
+                                                  ),
+
+                                                  detailRow(
+                                                    'TDS Amount',
+                                                    staff.tdsAmount > 0
+                                                        ? '₹${staff.tdsAmount}'
                                                         : '--',
                                                   ),
 

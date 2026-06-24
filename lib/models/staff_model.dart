@@ -13,6 +13,8 @@ class StaffModel {
   final bool esiEnabled;
   final double rdAmount;
   final DateTime createdAt;
+  final int odDays;
+  final double tdsAmount;
 
   StaffModel({
     required this.id,
@@ -27,6 +29,8 @@ class StaffModel {
     required this.esiEnabled,
     required this.rdAmount,
     required this.createdAt,
+    required this.odDays,
+    required this.tdsAmount,
   });
 
   Map<String, dynamic> toMap() {
@@ -42,6 +46,8 @@ class StaffModel {
       'esiEnabled': esiEnabled,
       'rdAmount': rdAmount,
       'createdAt': Timestamp.fromDate(createdAt),
+      'odDays': odDays,
+      'tdsAmount': tdsAmount,
     };
   }
 
@@ -82,6 +88,12 @@ class StaffModel {
       (map['createdAt'] as Timestamp?)
           ?.toDate() ??
           DateTime.now(),
+
+      odDays: map['odDays'] ?? 15,
+
+      tdsAmount:
+      (map['tdsAmount'] ?? 0)
+          .toDouble(),
     );
   }
 
@@ -98,6 +110,8 @@ class StaffModel {
     bool? esiEnabled,
     double? rdAmount,
     DateTime? createdAt,
+    int? odDays,
+    double? tdsAmount,
   }) {
     return StaffModel(
       id: id ?? this.id,
@@ -123,6 +137,10 @@ class StaffModel {
       rdAmount ?? this.rdAmount,
       createdAt:
       createdAt ?? this.createdAt,
+      odDays: odDays ?? this.odDays,
+
+      tdsAmount:
+      tdsAmount ?? this.tdsAmount,
     );
   }
 }

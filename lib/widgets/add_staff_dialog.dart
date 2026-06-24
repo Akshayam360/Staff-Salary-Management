@@ -33,6 +33,12 @@ class _AddStaffDialogState
   final rdController =
   TextEditingController(text: '0');
 
+  final odController =
+  TextEditingController(text: '15');
+
+  final tdsController =
+  TextEditingController(text: '0');
+
   DateTime? joiningDate;
 
   int experience = 0;
@@ -242,6 +248,34 @@ class _AddStaffDialogState
                 ),
               ],
             ),
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: odController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'OD Days',
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 20),
+
+                Expanded(
+                  child: TextField(
+                    controller: tdsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'TDS Amount',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
 
             const SizedBox(height: 30),
 
@@ -345,6 +379,15 @@ class _AddStaffDialogState
                       rdAmount: double.parse(
                         rdController.text,
                       ),
+
+                      odDays: int.parse(
+                        odController.text,
+                      ),
+
+                      tdsAmount: double.parse(
+                        tdsController.text,
+                      ),
+
                       createdAt: DateTime.now(),
                     );
 
