@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'widgets/sidebar.dart';
 import 'widgets/stat_card.dart';
 import '../staff/staff_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../calculator/salary_calculator_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -34,9 +34,7 @@ class _DashboardScreenState
           ),
 
           Expanded(
-            child: selectedIndex == 0
-                ? _buildDashboardContent()
-                : const StaffScreen(),
+            child: _buildScreen(),
           ),
         ],
       ),
@@ -322,5 +320,22 @@ class _DashboardScreenState
         ],
       ),
     );
+  }
+  Widget _buildScreen() {
+
+    switch (selectedIndex) {
+
+      case 0:
+        return _buildDashboardContent();
+
+      case 1:
+        return const StaffScreen();
+
+      case 2:
+        return const SalaryCalculatorScreen();
+
+      default:
+        return _buildDashboardContent();
+    }
   }
 }
