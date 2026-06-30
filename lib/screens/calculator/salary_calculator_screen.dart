@@ -54,6 +54,8 @@ class _SalaryCalculatorScreenState
         selectedStaff = staff;
       });
 
+      updateLclAndLlpStatus();
+
     } catch (e) {
 
       setState(() {
@@ -80,10 +82,34 @@ class _SalaryCalculatorScreenState
         ) ??
             0;
 
+    final lodUsed =
+        int.tryParse(
+          lodController.text,
+        ) ??
+            0;
+
+    final lclUsed =
+        int.tryParse(
+          lclController.text,
+        ) ??
+            0;
+
+    final llpUsed =
+        int.tryParse(
+          llpController.text,
+        ) ??
+            0;
+
+
     setState(() {
 
       clError = null;
       odError = null;
+
+      lodError = null;
+
+      lclError = null;
+      lclClDeduction = 0;
 
       // CL Validation
       if (selectedStaff!.clBalance == 0) {
@@ -110,7 +136,146 @@ class _SalaryCalculatorScreenState
         'OD exceeds available balance '
             '(Available: ${selectedStaff!.odDays})';
       }
+
+      // LOD Validation
+
+      if (lodUsed > totalWorkingDays) {
+        lodError =
+        'LOD cannot exceed Working Days ($totalWorkingDays)';
+      }
+
+      // LCL Validation
+
+      if (selectedStaff!.clBalance == 0) {
+
+        lclError = 'LCL disabled (CL Over)';
+        lclClDeduction = 0;
+
+      } else {
+
+        if (lclUsed <= 2) {
+
+          lclClDeduction = 0;
+
+        } else {
+
+          // First 2 late entries are free
+          int chargeableLate = lclUsed - 2;
+
+          // Only complete groups of 3 are considered
+          int completedGroups =
+              chargeableLate ~/ 3;
+
+          lclClDeduction =
+              completedGroups * 0.5;
+        }
+
+        if (lclClDeduction >
+            selectedStaff!.clBalance) {
+
+          lclError =
+          'Not enough CL Balance';
+        }
+      }
+
+      // LLP Validation
+
+      if (selectedStaff!.clBalance > 0) {
+
+        llpError =
+        'LLP disabled (CL Available)';
+
+        llpSalaryDeduction = 0;
+
+      } else {
+
+        if (llpUsed <= 2) {
+
+          llpSalaryDeduction = 0;
+
+        } else {
+
+          int chargeableLate =
+              llpUsed - 2;
+
+          int completedGroups =
+              chargeableLate ~/ 3;
+
+          llpSalaryDeduction =
+              completedGroups * 0.5;
+        }
+      }
     });
+  }
+
+  bool validateAllFields() {
+
+    bool isValid = true;
+
+    setState(() {
+
+      staffIdError = null;
+      workingDaysError = null;
+      presentDaysError = null;
+
+      validateLeaveFields();
+
+      if (selectedStaff == null) {
+        staffIdError = 'Staff Not Found';
+        isValid = false;
+      }
+
+      final workingDays =
+          int.tryParse(workingDaysController.text) ?? 0;
+
+      final presentDays =
+          int.tryParse(presentDaysController.text) ?? 0;
+
+      final maxDays = DateUtils.getDaysInMonth(
+        DateTime.now().year,
+        DateTime.now().month,
+      );
+
+      if (workingDays <= 0 || workingDays > maxDays) {
+
+        workingDaysError =
+        'Working Days should be between 1 and $maxDays';
+
+        isValid = false;
+      }
+
+      if (presentDays > workingDays) {
+
+        presentDaysError =
+        'Present Days cannot exceed Working Days';
+
+        isValid = false;
+      }
+
+    });
+
+    return isValid;
+  }
+
+  void updateLclAndLlpStatus() {
+
+    if (selectedStaff == null) return;
+
+    setState(() {
+
+      if (selectedStaff!.clBalance <= 0) {
+
+        lclEnabled = false;
+        llpEnabled = true;
+
+      } else {
+
+        lclEnabled = true;
+        llpEnabled = false;
+      }
+
+    });
+
   }
 
   double calculateLateDeductionDays(
@@ -135,6 +300,62 @@ class _SalaryCalculatorScreenState
 
     if (selectedStaff == null) {
       return;
+    }
+    if (totalWorkingDays <= 0) {
+      return;
+    }
+
+    final salaryPerDay =
+        selectedStaff!.baseSalary /
+            totalWorkingDays;
+
+    double absentDeduction =
+        (totalWorkingDays - presentDays) *
+            salaryPerDay;
+
+    double llpDeduction =
+        llpSalaryDeduction *
+            salaryPerDay;
+
+    double totalSalaryDeduction =
+        absentDeduction +
+            llpDeduction;
+
+    double grossSalary =
+        selectedStaff!.baseSalary;
+
+    double pf =
+    selectedStaff!.pfEnabled
+        ? 780
+        : 0;
+
+    double esi =
+    selectedStaff!.esiEnabled
+        ? double.parse(
+      (grossSalary * 0.0075)
+          .toStringAsFixed(2),
+    )
+        : 0;
+
+    double rd =
+        selectedStaff!.rdAmount;
+
+    double tds =
+        selectedStaff!.tdsAmount;
+
+    double totalDeduction =
+        totalSalaryDeduction +
+            pf +
+            esi +
+            rd +
+            tds;
+
+    double netSalary =
+        grossSalary -
+            totalDeduction;
+
+    if (netSalary < 0) {
+      netSalary = 0;
     }
 
     setState(() {
@@ -215,8 +436,25 @@ class _SalaryCalculatorScreenState
 
   String? presentDaysError;
 
+  String? staffIdError;
+
+  bool lclEnabled = true;
+  bool llpEnabled = false;
+
+  double lclClDeduction = 0;
+
   String? clError;
   String? odError;
+
+  String? lodError;
+
+  String? lclError;
+
+  String? llpError;
+
+  double llpSalaryDeduction = 0;
+
+
 
   StaffModel? selectedStaff;
 
@@ -425,6 +663,7 @@ class _SalaryCalculatorScreenState
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: 'Working Days',
+
                             filled: true,
                             fillColor: Colors.white,
 
@@ -603,6 +842,7 @@ class _SalaryCalculatorScreenState
                     controller: staffIdController,
                     decoration: InputDecoration(
                       labelText: 'Staff ID',
+                      errorText: staffIdError,
                       filled: true,
                       fillColor: Colors.white,
 
@@ -815,8 +1055,12 @@ class _SalaryCalculatorScreenState
                         child: TextField(
                           controller: lodController,
                           keyboardType: TextInputType.number,
+                          onChanged: (_){
+                            validateLeaveFields();
+                          },
                           decoration: InputDecoration(
                             labelText: 'LOD',
+                            errorText: lodError,
                             filled: true,
                             fillColor: Colors.white,
 
@@ -849,12 +1093,17 @@ class _SalaryCalculatorScreenState
 
                       Expanded(
                         child: TextField(
+                          enabled: lclEnabled,
                           controller: lclController,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: 'LCL',
                             filled: true,
                             fillColor: Colors.white,
+
+                            helperText: lclEnabled
+                                ? '2 days grace applies'
+                                : 'LCL unavailable (CL Balance is 0)',
 
                             border: OutlineInputBorder(
                               borderRadius:
@@ -886,6 +1135,7 @@ class _SalaryCalculatorScreenState
                   const SizedBox(height: 15),
 
                   TextField(
+                    enabled: llpEnabled,
                     controller: llpController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
@@ -923,10 +1173,17 @@ class _SalaryCalculatorScreenState
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: calculateSalary,
+                      onPressed: () {
+
+                        if (validateAllFields()) {
+
+                          calculateSalary();
+
+                        }
+
+                      },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        const Color(0xFF08152E),
+                        backgroundColor: const Color(0xFF08152E),
                       ),
                       child: const Text(
                         'Calculate Salary',
