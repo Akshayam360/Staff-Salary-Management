@@ -317,7 +317,7 @@ class _SalaryCalculatorScreenState
         llpSalaryDeduction *
             salaryPerDay;
 
-    double totalSalaryDeduction =
+    double lopDeduction =
         absentDeduction +
             llpDeduction;
 
@@ -344,7 +344,7 @@ class _SalaryCalculatorScreenState
         selectedStaff!.tdsAmount;
 
     double totalDeduction =
-        totalSalaryDeduction +
+        lopDeduction +
             pf +
             esi +
             rd +
@@ -397,9 +397,23 @@ class _SalaryCalculatorScreenState
         ) ??
             0,
 
-        'grossSalary':
-        selectedStaff!
-            .baseSalary,
+        'grossSalary': grossSalary,
+
+        'lopDeduction': lopDeduction,
+
+        'pf': pf,
+
+        'esi': esi,
+
+        'rd': rd,
+
+        'tds': tds,
+
+        'totalDeduction': totalDeduction,
+
+        'finalSalary': netSalary,
+
+
       };
     });
   }
@@ -599,15 +613,22 @@ class _SalaryCalculatorScreenState
               ),
             ),
 
-            const SizedBox(height: 30),
+        const SizedBox(height: 30),
 
-            Container(
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+            Expanded(
+            flex: 4,
+            child: Container(
               padding: const EdgeInsets.all(25),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16),
               ),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1194,11 +1215,366 @@ class _SalaryCalculatorScreenState
                     ),
                   ),
 
+
+
                 ],
               ),
             ),
+            ),
+              const SizedBox(width: 25),
+
+
+            // Salary Slip Card Start
+              Expanded(
+                flex: 5,
+                child: Container(
+                  padding: const EdgeInsets.all(25),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        Row(
+                          children: [
+
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+
+                                const Text(
+                                  'SALARY SLIP',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    letterSpacing: 2,
+                                    fontSize: 12,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                Text(
+                                  selectedStaff?.name ?? '-',
+                                  style: const TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                Text(
+                                  selectedStaff?.staffId ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+
+                                Text(
+                                  selectedMonth,
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const Spacer(),
+
+                            ElevatedButton.icon(
+                              onPressed: result == null
+                                  ? null
+                                  : () {
+
+                                // Save History next step
+
+                              },
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
+
+                              icon: const Icon(Icons.save),
+
+                              label: const Text(
+                                'Save History',
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 25),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+
+                          summaryCard(
+                            'Working',
+                            '${result?['workingDays'] ?? '-'}',
+
+                          ),
+
+                          summaryCard(
+                            'Present',
+                            '${result?['presentDays'] ?? '-'}',
+
+                          ),
+
+                          summaryCard(
+                            'Absent',
+                            '${result?['absentDays'] ?? '-'}',
+
+                          ),
+
+                          summaryCard(
+                            'CL Used',
+                            '${result?['clUsed'] ?? '-'}',
+
+                          ),
+
+                          summaryCard(
+                            'CL Left',
+                            selectedStaff == null
+                                ? '-'
+                                : (selectedStaff!.clBalance -
+                                (result?['clUsed'] ?? 0))
+                                .toString(),
+                          ),
+
+
+                          summaryCard(
+                            'OD Used',
+                            '${result?['odUsed'] ?? '-'}',
+
+                          ),
+
+                          summaryCard(
+                            'OD Left',
+                            selectedStaff == null
+                                ? '-'
+                                : (selectedStaff!.odDays -
+                                (result?['odUsed'] ?? 0))
+                                .toString(),
+                          ),
+
+                          summaryCard(
+                            'LOD',
+                            '${result?['lod'] ?? '-'}',
+
+                          ),
+
+                          summaryCard(
+                            'LCL',
+                            '${result?['lcl'] ?? '-'}',
+
+                          ),
+
+                          summaryCard(
+                            'LLP',
+                            '${result?['llp'] ?? '-'}',
+
+                          ),
+
+
+                        ],
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+
+                            salaryRow(
+                              'Gross Salary',
+                              result?['grossSalary'],
+                            ),
+
+                            salaryRow(
+                              'LOP Deduction',
+                              result?['lopDeduction'],
+                            ),
+
+                            salaryRow(
+                              'PF',
+                              result?['pf'],
+                            ),
+
+                            salaryRow(
+                              'ESI (0.75%)',
+                              result?['esi'],
+                            ),
+
+                            salaryRow(
+                              'RD',
+                              result?['rd'],
+                            ),
+
+                            salaryRow(
+                              'TDS',
+                              result?['tds'],
+                            ),
+
+                            salaryRow(
+                              'Total Deductions',
+                              result?['totalDeduction'],
+                              isBold: true,
+                            ),
+
+                            Container(
+                              width: double.infinity,
+                              constraints: const BoxConstraints(
+                                minHeight: 55,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 20,
+                              ),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF08152E),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+
+                                  const Text(
+                                    'FINAL SALARY',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+
+                                  const Spacer(),
+
+                                  Text(
+                                    '₹${(result?['finalSalary'] ?? 0).toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ],
+                    ),
+
+                ),
+              ),
+              ),
+          ],
+
+        ),
+      ),
           ],
         ),
+      ),
+    );
+
+
+  }
+
+  Widget summaryCard(
+      String title,
+      String value,
+
+      ) {
+    return Container(
+      width: 155,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.shade300,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 11,
+              letterSpacing: 1,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget salaryRow(
+      String title,
+      dynamic value, {
+        bool isBold = false,
+      }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: 15,
+      ),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey.shade300,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: isBold
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+            ),
+          ),
+
+          const Spacer(),
+
+          Text(
+            '₹${(value ?? 0).toStringAsFixed(2)}',
+            style: TextStyle(
+              fontWeight: isBold
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+            ),
+          ),
+        ],
       ),
     );
   }
