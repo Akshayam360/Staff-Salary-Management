@@ -251,7 +251,7 @@ class _StaffScreenState
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                     child: DataTable(
-                      columnSpacing: 65,
+                      columnSpacing: 55,
                       horizontalMargin: 15,
 
                       headingRowHeight: 50,

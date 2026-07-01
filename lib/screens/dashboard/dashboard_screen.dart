@@ -4,6 +4,7 @@ import 'widgets/stat_card.dart';
 import '../staff/staff_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../calculator/salary_calculator_screen.dart';
+import '../history/salary_history_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -333,6 +334,9 @@ class _DashboardScreenState
 
       case 2:
         return const SalaryCalculatorScreen();
+
+      case 3:
+        return const SalaryHistoryScreen();
 
       default:
         return _buildDashboardContent();

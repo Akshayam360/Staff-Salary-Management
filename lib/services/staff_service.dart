@@ -75,4 +75,22 @@ class StaffService {
       );
     }
   }
+  Future<void> updateLeaveBalance({
+    required String documentId,
+    required int clBalance,
+    required int odDays,
+  }) async {
+
+    await _firestore
+        .collection('staff')
+        .doc(documentId)
+        .update({
+
+      'clBalance': clBalance,
+
+      'odDays': odDays,
+    });
+  }
+
+
 }

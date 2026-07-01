@@ -401,6 +401,12 @@ class _SalaryCalculatorScreenState
 
         'lopDeduction': lopDeduction,
 
+        'salaryPerDay': salaryPerDay,
+
+        'absentDeduction': absentDeduction,
+
+        'llpDeduction': llpDeduction,
+
         'pf': pf,
 
         'esi': esi,
@@ -1286,12 +1292,171 @@ class _SalaryCalculatorScreenState
                             ElevatedButton.icon(
                               onPressed: result == null
                                   ? null
-                                  : () {
+                                  : () async {
 
-                                // Save History next step
+                                if (selectedStaff == null) return;
 
+                                final alreadyExists =
+                                await salaryHistoryService.salaryAlreadyGenerated(
+
+                                  staffId: selectedStaff!.staffId,
+
+                                  month: selectedMonth,
+                                );
+
+                                if (alreadyExists) {
+
+                                  if (mounted) {
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+
+                                      const SnackBar(
+
+                                        content: Text(
+                                          'Salary already generated for this month.',
+                                        ),
+
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                  }
+
+                                  return;
+                                }
+
+                                final history = SalaryHistoryModel(
+
+                                  id: '',
+
+                                  staffId: selectedStaff!.staffId,
+
+                                  staffName: selectedStaff!.name,
+
+                                  bankAccountNumber: selectedStaff!.bankAccountNumber,
+
+                                  month: selectedMonth,
+
+                                  workingDays: totalWorkingDays,
+
+                                  presentDays: presentDays,
+
+                                  absentDays: totalWorkingDays - presentDays,
+
+                                  clUsed: double.parse(clController.text),
+
+                                  odUsed: double.parse(odController.text),
+
+                                  lodDays: int.parse(lodController.text),
+
+                                  lclDays: int.parse(lclController.text),
+
+                                  llpDays: int.parse(llpController.text),
+
+                                  grossSalary: result!['grossSalary'],
+
+                                  perDaySalary: result!['salaryPerDay'],
+
+                                  lopAmount: result!['absentDeduction'],
+
+                                  llpAmount: result!['llpDeduction'],
+
+                                  pfAmount: result!['pf'],
+
+                                  esiAmount: result!['esi'],
+
+                                  rdAmount: result!['rd'],
+
+                                  tdsAmount: result!['tds'],
+
+                                  totalDeduction: result!['totalDeduction'],
+
+                                  finalSalary: result!['finalSalary'],
+
+                                  createdAt: DateTime.now(),
+                                );
+
+                                await salaryHistoryService.saveSalaryHistory(
+                                  history,
+                                );
+
+                                await staffService.updateLeaveBalance(
+
+                                  documentId: selectedStaff!.id,
+
+                                  clBalance: selectedStaff!.clBalance -
+                                      int.parse(clController.text),
+
+                                  odDays: selectedStaff!.odDays -
+                                      int.parse(odController.text),
+                                );
+
+                                setState(() {
+
+                                  selectedStaff = selectedStaff!.copyWith(
+
+                                    clBalance:
+                                    selectedStaff!.clBalance -
+                                        int.parse(clController.text),
+
+                                    odDays:
+                                    selectedStaff!.odDays -
+                                        int.parse(odController.text),
+                                  );
+
+                                });
+
+                                if (mounted) {
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+
+                                    const SnackBar(
+
+                                      content: Text(
+                                        'Salary History Saved Successfully',
+                                      ),
+
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+
+                                  staffIdController.clear();
+
+                                  clController.text = '0';
+
+                                  odController.text = '0';
+
+                                  lodController.text = '0';
+
+                                  lclController.text = '0';
+
+                                  llpController.text = '0';
+
+                                  workingDaysController.text = '';
+
+                                  presentDaysController.text = '';
+
+                                  setState(() {
+
+                                    result = null;
+
+                                    selectedStaff = null;
+
+                                    totalWorkingDays = DateUtils.getDaysInMonth(
+                                      DateTime.now().year,
+                                      DateTime.now().month,
+                                    );
+
+                                    presentDays = totalWorkingDays;
+
+                                    workingDaysController.text =
+                                        totalWorkingDays.toString();
+
+                                    presentDaysController.text =
+                                        presentDays.toString();
+
+                                  });
+                                }
                               },
-
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,

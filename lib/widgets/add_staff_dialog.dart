@@ -51,7 +51,7 @@ class _AddStaffDialogState
     await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      firstDate: DateTime(1984),
       lastDate: DateTime.now(),
     );
 

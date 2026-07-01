@@ -4,6 +4,7 @@ class SalaryHistoryModel {
   final String id;
   final String staffId;
   final String staffName;
+  final String bankAccountNumber;
   final String month;
 
   final int workingDays;
@@ -32,10 +33,13 @@ class SalaryHistoryModel {
 
   final DateTime createdAt;
 
+
+
   SalaryHistoryModel({
     required this.id,
     required this.staffId,
     required this.staffName,
+    required this.bankAccountNumber,
     required this.month,
     required this.workingDays,
     required this.presentDays,
@@ -56,6 +60,7 @@ class SalaryHistoryModel {
     required this.totalDeduction,
     required this.finalSalary,
     required this.createdAt,
+
   });
 
   factory SalaryHistoryModel.fromMap(
@@ -66,6 +71,8 @@ class SalaryHistoryModel {
       id: documentId,
       staffId: map['staffId'] ?? '',
       staffName: map['staffName'] ?? '',
+      bankAccountNumber:
+      map['bankAccountNumber'] ?? '',
       month: map['month'] ?? '',
       workingDays: map['workingDays'] ?? 0,
       presentDays: map['presentDays'] ?? 0,
@@ -89,6 +96,7 @@ class SalaryHistoryModel {
       (map['finalSalary'] ?? 0).toDouble(),
       createdAt:
       (map['createdAt'] as Timestamp).toDate(),
+
     );
   }
 
@@ -96,6 +104,7 @@ class SalaryHistoryModel {
     return {
       'staffId': staffId,
       'staffName': staffName,
+      'bankAccountNumber': bankAccountNumber,
       'month': month,
       'workingDays': workingDays,
       'presentDays': presentDays,
@@ -117,6 +126,7 @@ class SalaryHistoryModel {
       'finalSalary': finalSalary,
       'createdAt': Timestamp.fromDate(
         createdAt,
+
       ),
     };
   }
@@ -125,6 +135,7 @@ class SalaryHistoryModel {
     String? id,
     String? staffId,
     String? staffName,
+    String? bankAccountNumber,
     String? month,
     int? workingDays,
     int? presentDays,
@@ -150,6 +161,8 @@ class SalaryHistoryModel {
       id: id ?? this.id,
       staffId: staffId ?? this.staffId,
       staffName: staffName ?? this.staffName,
+      bankAccountNumber:
+      bankAccountNumber ?? this.bankAccountNumber,
       month: month ?? this.month,
       workingDays:
       workingDays ?? this.workingDays,
@@ -185,6 +198,7 @@ class SalaryHistoryModel {
       finalSalary ?? this.finalSalary,
       createdAt:
       createdAt ?? this.createdAt,
+
     );
   }
 }

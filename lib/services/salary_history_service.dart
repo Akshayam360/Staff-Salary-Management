@@ -70,6 +70,26 @@ class SalaryHistoryService {
     );
   }
 
+  Future<bool> salaryAlreadyGenerated({
+    required String staffId,
+    required String month,
+  }) async {
+
+    final snapshot = await _firestore
+        .collection('salary_history')
+        .where(
+      'staffId',
+      isEqualTo: staffId,
+    )
+        .where(
+      'month',
+      isEqualTo: month,
+    )
+        .get();
+
+    return snapshot.docs.isNotEmpty;
+  }
+
   Future<void> deleteSalaryHistory(
       String id,
       ) async {
