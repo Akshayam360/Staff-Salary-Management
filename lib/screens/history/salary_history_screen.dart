@@ -22,6 +22,61 @@ class _SalaryHistoryScreenState
   salaryHistoryService =
   SalaryHistoryService();
 
+  final TextEditingController searchController =
+  TextEditingController();
+
+  String searchText = '';
+
+  String selectedMonthFilter = 'All';
+
+  String selectedYearFilter = 'All';
+
+  final List<String> monthFilters = [
+
+    'All',
+
+    'January',
+
+    'February',
+
+    'March',
+
+    'April',
+
+    'May',
+
+    'June',
+
+    'July',
+
+    'August',
+
+    'September',
+
+    'October',
+
+    'November',
+
+    'December',
+
+  ];
+
+  final List<String> yearFilters = [
+
+    'All',
+
+    '2026',
+
+    '2027',
+
+    '2028',
+
+    '2029',
+
+    '2030',
+
+  ];
+
   final StaffService
   staffService =
   StaffService();
@@ -58,6 +113,130 @@ class _SalaryHistoryScreenState
 
             const SizedBox(height: 30),
 
+            TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText:
+                'Search Staff ID / Name / Account Number',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius:
+                  BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchText =
+                      value.toLowerCase();
+                });
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedMonthFilter,
+                    decoration: InputDecoration(
+                      labelText: 'Month',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: monthFilters.map((month) {
+
+                      return DropdownMenuItem(
+                        value: month,
+                        child: Text(month),
+                      );
+
+                    }).toList(),
+                    onChanged: (value) {
+
+                      setState(() {
+
+                        selectedMonthFilter = value!;
+
+                      });
+
+                    },
+                  ),
+                ),
+
+                const SizedBox(width: 20),
+
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedYearFilter,
+                    decoration: InputDecoration(
+                      labelText: 'Year',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: yearFilters.map((year) {
+
+                      return DropdownMenuItem(
+                        value: year,
+                        child: Text(year),
+                      );
+
+                    }).toList(),
+                    onChanged: (value) {
+
+                      setState(() {
+
+                        selectedYearFilter = value!;
+
+                      });
+
+                    },
+                  ),
+                ),
+
+                const SizedBox(width: 20),
+
+                ElevatedButton.icon(
+                  onPressed: () {
+
+                    searchController.clear();
+
+                    setState(() {
+
+                      searchText = '';
+
+                      selectedMonthFilter = 'All';
+
+                      selectedYearFilter = 'All';
+
+                    });
+
+                  },
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 18,
+                    ),
+                  ),
+
+                  icon: const Icon(Icons.clear),
+
+                  label: const Text(
+                    'Clear',
+                  ),
+                ),
+
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
             Expanded(
               child: StreamBuilder<List<SalaryHistoryModel>>(
                 stream: salaryHistoryService.getSalaryHistory(),
@@ -81,9 +260,42 @@ class _SalaryHistoryScreenState
 
                   final histories = snapshot.data!;
 
+                  final filteredHistories =
+                  histories.where((salary) {
+
+                    final searchMatch =
+
+                        salary.staffId
+                            .toLowerCase()
+                            .contains(searchText) ||
+
+                            salary.staffName
+                                .toLowerCase()
+                                .contains(searchText) ||
+
+                            salary.bankAccountNumber
+                                .toLowerCase()
+                                .contains(searchText);
+
+                    final monthMatch =
+                        selectedMonthFilter == 'All' ||
+
+                            salary.month.contains(selectedMonthFilter);
+
+                    final yearMatch =
+                        selectedYearFilter == 'All' ||
+
+                            salary.month.contains(selectedYearFilter);
+
+                    return searchMatch &&
+                        monthMatch &&
+                        yearMatch;
+
+                  }).toList();
+
                   final Map<String, List<SalaryHistoryModel>> groupedHistory = {};
 
-                  for (final history in histories) {
+                  for (final history in filteredHistories) {
                     groupedHistory.putIfAbsent(
                       history.month,
                           () => [],
@@ -163,7 +375,22 @@ class _SalaryHistoryScreenState
                               scrollDirection: Axis.horizontal,
                               child: DataTable(
 
-                                columnSpacing: 80,
+                                headingRowColor: WidgetStateProperty.all(
+                                  const Color(0xFF37474F),
+                                ),
+
+                                headingTextStyle: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+
+                                dataRowMinHeight: 55,
+
+                                dataRowMaxHeight: 55,
+
+                                columnSpacing: 65,
+
 
                                 columns: const [
 

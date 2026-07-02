@@ -243,7 +243,7 @@ class _DashboardScreenState
 
                 return SingleChildScrollView(
                   child: DataTable(
-                    columnSpacing: 120,
+                    columnSpacing: 100,
                     horizontalMargin: 20,
                     dataRowHeight: 60,
                     headingRowHeight: 55,

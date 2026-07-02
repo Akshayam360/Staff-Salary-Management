@@ -155,7 +155,7 @@ class _EditStaffDialogState
                     child: TextField(
                       controller:
                       staffIdController,
-                      enabled: false,
+                      enabled: true,
                       decoration:
                       const InputDecoration(
                         labelText:
