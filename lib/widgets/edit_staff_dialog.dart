@@ -198,89 +198,56 @@ class _EditStaffDialogState
               const SizedBox(
                   height: 20),
 
-              Row(
-                children: [
+        Row(
+          children: [
 
-                  Expanded(
-                    child: TextField(
-                      controller:
-                      bankController,
-                      decoration:
-                      const InputDecoration(
-                        labelText:
-                        'Bank Account',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(
-                      height: 20),
-
-                  Row(
-                    children: [
-
-                      Expanded(
-                        child: InkWell(
-                          onTap: () async {
-
-                            final pickedDate =
-                            await showDatePicker(
-                              context: context,
-                              initialDate: selectedDate,
-                              firstDate: DateTime(1990),
-                              lastDate: DateTime(2100),
-                            );
-
-                            if (pickedDate != null) {
-                              setState(() {
-                                selectedDate = pickedDate;
-                              });
-                            }
-
-                          },
-
-                          child: InputDecorator(
-                            decoration: const InputDecoration(
-                              labelText: 'Date of Joining',
-                            ),
-
-                            child: Text(
-                              DateFormat(
-                                'dd-MM-yyyy',
-                              ).format(selectedDate),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 20),
-
-                      const Expanded(
-                        child: SizedBox(),
-                      ),
-
-                    ],
-                  ),
-
-                  const SizedBox(
-                      width: 20),
-
-                  Expanded(
-                    child: TextField(
-                      controller:
-                      salaryController,
-                      keyboardType:
-                      TextInputType
-                          .number,
-                      decoration:
-                      const InputDecoration(
-                        labelText:
-                        'Base Salary',
-                      ),
-                    ),
-                  ),
-                ],
+            Expanded(
+              child: TextField(
+                controller: bankController,
+                decoration: const InputDecoration(
+                  labelText: 'Bank Account',
+                ),
               ),
+            ),
+
+            const SizedBox(width: 20),
+
+            Expanded(
+              child: InkWell(
+                onTap: () async {
+
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(1990),
+                    lastDate: DateTime(2100),
+                  );
+
+                  if (pickedDate != null) {
+                    setState(() {
+                      selectedDate = pickedDate;
+                    });
+                  }
+
+                },
+
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Date of Joining',
+                  ),
+
+                  child: Text(
+                    DateFormat(
+                      'dd-MM-yyyy',
+                    ).format(selectedDate),
+                  ),
+                ),
+              ),
+            ),
+
+          ],
+        ),
+
 
 
 
@@ -290,6 +257,19 @@ class _EditStaffDialogState
 
               Row(
                 children: [
+
+                  Expanded(
+                    child: TextField(
+                      controller: salaryController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Base Salary',
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 20),
+
 
                   Expanded(
                     child: TextField(
