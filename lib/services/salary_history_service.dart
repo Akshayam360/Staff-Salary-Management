@@ -28,7 +28,7 @@ class SalaryHistoryService {
         .collection('salary_history')
         .orderBy(
       'createdAt',
-      descending: true,
+      descending: false,
     )
         .snapshots()
         .map(
@@ -103,5 +103,12 @@ class SalaryHistoryService {
         'Failed to delete salary history: $e',
       );
     }
+  }
+
+  Stream<int> getSalaryRunCount() {
+    return _firestore
+        .collection('salary_history')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
   }
 }

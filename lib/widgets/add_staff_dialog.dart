@@ -270,7 +270,7 @@ class _AddStaffDialogState
                 Expanded(
                   child: TextField(
                     controller:
-                    rdController,
+                    licController,
                     keyboardType:
                     TextInputType
                         .number,
@@ -362,78 +362,94 @@ class _AddStaffDialogState
 
                 ElevatedButton(
                   onPressed: () async {
-
                     if (staffIdController.text.isEmpty ||
                         nameController.text.isEmpty ||
                         bankAccountController.text.isEmpty ||
                         salaryController.text.isEmpty ||
                         joiningDate == null) {
-
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content:
-                          Text('Fill all required fields'),
+                          content: Text("Fill all required fields"),
                         ),
                       );
-
                       return;
                     }
-
                     final staff = StaffModel(
                       id: '',
-                      staffId: staffIdController.text.trim(),
+                      staffId: staffIdController.text.trim().toUpperCase(),
                       name: nameController.text.trim(),
                       bankAccountNumber:
                       bankAccountController.text.trim(),
                       dateOfJoining: joiningDate!,
                       experience: experience,
-                      baseSalary: double.parse(
-                        salaryController.text,
-                      ),
-                      clBalance: double.parse(
-                        clController.text,
-                      ),
+                      baseSalary:
+                      double.parse(salaryController.text),
+                      clBalance:
+                      double.parse(clController.text),
                       pfEnabled: pfEnabled,
                       esiEnabled: esiEnabled,
-                      rdAmount: double.parse(
-                        rdController.text,
-                      ),
-
-                      licAmount: double.parse(
-                        licController.text,
-                      ),
-
-                      odDays: int.parse(
-                        odController.text,
-                      ),
-
-                      tdsAmount: double.parse(
-                        tdsController.text,
-                      ),
-
+                      rdAmount:
+                      double.tryParse(rdController.text) ?? 0,
+                      licAmount:
+                      double.tryParse(licController.text) ?? 0,
+                      odDays:
+                      int.parse(odController.text),
+                      tdsAmount:
+                      double.tryParse(tdsController.text) ?? 0,
                       createdAt: DateTime.now(),
                     );
 
-                    await _staffService.addStaff(
-                      staff,
-                    );
+                    try {
 
-                    if (context.mounted) {
+                      bool alreadyExists =
+                      await _staffService.isStaffIdExists(
+                        staffIdController.text.trim().toUpperCase(),
+                      );
+
+                      if (alreadyExists) {
+
+                        if (!mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'This Staff ID already exists. Please enter a unique Staff ID.',
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+
+                        return;
+                      }
+
+                      await _staffService.addStaff(staff);
+
+                      if (!mounted) return;
 
                       Navigator.pop(context);
 
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                            'Staff Added Successfully ✅',
+                            "Staff Added Successfully ✅",
                           ),
                           backgroundColor: Colors.green,
                         ),
                       );
+
+                    } catch (e) {
+
+                      if (!mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(e.toString()),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                     }
-                  },
+                    },
+
                   style:
                   ElevatedButton
                       .styleFrom(

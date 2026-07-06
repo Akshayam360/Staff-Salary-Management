@@ -27,7 +27,7 @@ class StaffService {
         .collection('staff')
         .orderBy(
       'createdAt',
-      descending: true,
+      descending: false,
     )
         .snapshots()
         .map(
@@ -90,6 +90,21 @@ class StaffService {
 
       'odDays': odDays,
     });
+  }
+
+  Future<bool> isStaffIdExists(
+      String staffId,
+      ) async {
+
+    final snapshot = await _firestore
+        .collection('staff')
+        .where(
+      'staffId',
+      isEqualTo: staffId,
+    )
+        .get();
+
+    return snapshot.docs.isNotEmpty;
   }
 
 

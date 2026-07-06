@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/staff_model.dart';
 import '../services/staff_service.dart';
+import 'package:intl/intl.dart';
 
 class EditStaffDialog extends StatefulWidget {
   final StaffModel staff;
@@ -51,6 +52,8 @@ class _EditStaffDialogState
 
   late bool pfEnabled;
   late bool esiEnabled;
+
+  late DateTime selectedDate;
 
   @override
   void initState() {
@@ -110,6 +113,8 @@ class _EditStaffDialogState
 
     esiEnabled =
         widget.staff.esiEnabled;
+
+    selectedDate = widget.staff.dateOfJoining;
   }
 
   @override
@@ -209,6 +214,55 @@ class _EditStaffDialogState
                   ),
 
                   const SizedBox(
+                      height: 20),
+
+                  Row(
+                    children: [
+
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+
+                            final pickedDate =
+                            await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate,
+                              firstDate: DateTime(1990),
+                              lastDate: DateTime(2100),
+                            );
+
+                            if (pickedDate != null) {
+                              setState(() {
+                                selectedDate = pickedDate;
+                              });
+                            }
+
+                          },
+
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Date of Joining',
+                            ),
+
+                            child: Text(
+                              DateFormat(
+                                'dd-MM-yyyy',
+                              ).format(selectedDate),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 20),
+
+                      const Expanded(
+                        child: SizedBox(),
+                      ),
+
+                    ],
+                  ),
+
+                  const SizedBox(
                       width: 20),
 
                   Expanded(
@@ -227,6 +281,9 @@ class _EditStaffDialogState
                   ),
                 ],
               ),
+
+
+
 
               const SizedBox(
                   height: 20),
@@ -446,6 +503,8 @@ class _EditStaffDialogState
 
                         esiEnabled:
                         esiEnabled,
+
+                        dateOfJoining: selectedDate,
                       );
 
                       await _staffService
