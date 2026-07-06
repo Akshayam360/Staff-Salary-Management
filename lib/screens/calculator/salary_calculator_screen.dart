@@ -71,7 +71,7 @@ class _SalaryCalculatorScreenState
     }
 
     final clUsed =
-        int.tryParse(
+        double.tryParse(
           clController.text,
         ) ??
             0;
@@ -317,12 +317,18 @@ class _SalaryCalculatorScreenState
         llpSalaryDeduction *
             salaryPerDay;
 
+    double grossSalary =
+        selectedStaff!.baseSalary;
+
+
     double lopDeduction =
         absentDeduction +
             llpDeduction;
 
-    double grossSalary =
-        selectedStaff!.baseSalary;
+    double salaryAfterLop =
+        grossSalary -
+            lopDeduction;
+
 
     double pf =
     selectedStaff!.pfEnabled
@@ -332,13 +338,16 @@ class _SalaryCalculatorScreenState
     double esi =
     selectedStaff!.esiEnabled
         ? double.parse(
-      (grossSalary * 0.0075)
+      (salaryAfterLop * 0.0075)
           .toStringAsFixed(2),
     )
         : 0;
 
     double rd =
         selectedStaff!.rdAmount;
+
+    double lic =
+        selectedStaff!.licAmount;
 
     double tds =
         selectedStaff!.tdsAmount;
@@ -348,6 +357,7 @@ class _SalaryCalculatorScreenState
             pf +
             esi +
             rd +
+            lic +
             tds;
 
     double netSalary =
@@ -368,7 +378,7 @@ class _SalaryCalculatorScreenState
             presentDays,
 
         'clUsed':
-        int.tryParse(
+        double.tryParse(
           clController.text,
         ) ??
             0,
@@ -412,6 +422,8 @@ class _SalaryCalculatorScreenState
         'esi': esi,
 
         'rd': rd,
+
+        'lic': lic,
 
         'tds': tds,
 
@@ -482,7 +494,7 @@ class _SalaryCalculatorScreenState
 
   int totalWorkingDays = 30;
 
-  int presentDays = 30;
+  double presentDays = 30;
 
   late String selectedMonth;
 
@@ -551,7 +563,7 @@ class _SalaryCalculatorScreenState
             0;
 
     final presentDays =
-        int.tryParse(
+        double.tryParse(
           presentDaysController.text,
         ) ??
             0;
@@ -976,7 +988,9 @@ class _SalaryCalculatorScreenState
                       Expanded(
                         child: TextField(
                           controller: clController,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
 
                           enabled:
                           selectedStaff != null &&
@@ -1340,7 +1354,8 @@ class _SalaryCalculatorScreenState
 
                                   presentDays: presentDays,
 
-                                  absentDays: totalWorkingDays - presentDays,
+                                  absentDays:
+                                  (totalWorkingDays - presentDays),
 
                                   clUsed: double.parse(clController.text),
 
@@ -1366,6 +1381,8 @@ class _SalaryCalculatorScreenState
 
                                   rdAmount: result!['rd'],
 
+                                  licAmount: result!['lic'],
+
                                   tdsAmount: result!['tds'],
 
                                   totalDeduction: result!['totalDeduction'],
@@ -1383,11 +1400,14 @@ class _SalaryCalculatorScreenState
 
                                   documentId: selectedStaff!.id,
 
-                                  clBalance: selectedStaff!.clBalance -
-                                      int.parse(clController.text),
-
-                                  odDays: selectedStaff!.odDays -
+                                  clBalance:
+                                  selectedStaff!.clBalance -
+                                      int.parse(clController.text) -
+                                      lclClDeduction,
+                                  odDays:
+                                  selectedStaff!.odDays -
                                       int.parse(odController.text),
+
                                 );
 
                                 setState(() {
@@ -1446,7 +1466,8 @@ class _SalaryCalculatorScreenState
                                       DateTime.now().month,
                                     );
 
-                                    presentDays = totalWorkingDays;
+
+                                    presentDays = totalWorkingDays.toDouble();
 
                                     workingDaysController.text =
                                         totalWorkingDays.toString();
@@ -1583,6 +1604,11 @@ class _SalaryCalculatorScreenState
                             salaryRow(
                               'RD',
                               result?['rd'],
+                            ),
+
+                            salaryRow(
+                              'LIC',
+                              result?['lic'],
                             ),
 
                             salaryRow(

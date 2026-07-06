@@ -33,6 +33,9 @@ class _AddStaffDialogState
   final rdController =
   TextEditingController(text: '0');
 
+  final licController =
+  TextEditingController();
+
   final odController =
   TextEditingController(text: '15');
 
@@ -234,6 +237,21 @@ class _AddStaffDialogState
 
                 Expanded(
                   child: TextField(
+                    controller: odController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'OD Days',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
                     controller:
                     rdController,
                     keyboardType:
@@ -246,18 +264,20 @@ class _AddStaffDialogState
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
 
-            Row(
-              children: [
+                const SizedBox(width: 20),
+
                 Expanded(
                   child: TextField(
-                    controller: odController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'OD Days',
+                    controller:
+                    rdController,
+                    keyboardType:
+                    TextInputType
+                        .number,
+                    decoration:
+                    const InputDecoration(
+                      labelText:
+                      'LIC Amount',
                     ),
                   ),
                 ),
@@ -371,13 +391,17 @@ class _AddStaffDialogState
                       baseSalary: double.parse(
                         salaryController.text,
                       ),
-                      clBalance: int.parse(
+                      clBalance: double.parse(
                         clController.text,
                       ),
                       pfEnabled: pfEnabled,
                       esiEnabled: esiEnabled,
                       rdAmount: double.parse(
                         rdController.text,
+                      ),
+
+                      licAmount: double.parse(
+                        licController.text,
                       ),
 
                       odDays: int.parse(

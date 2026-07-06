@@ -8,10 +8,11 @@ class StaffModel {
   final DateTime dateOfJoining;
   final int experience;
   final double baseSalary;
-  final int clBalance;
+  final double clBalance;
   final bool pfEnabled;
   final bool esiEnabled;
   final double rdAmount;
+  final double licAmount;
   final DateTime createdAt;
   final int odDays;
   final double tdsAmount;
@@ -28,6 +29,7 @@ class StaffModel {
     required this.pfEnabled,
     required this.esiEnabled,
     required this.rdAmount,
+    required this.licAmount,
     required this.createdAt,
     required this.odDays,
     required this.tdsAmount,
@@ -45,6 +47,7 @@ class StaffModel {
       'pfEnabled': pfEnabled,
       'esiEnabled': esiEnabled,
       'rdAmount': rdAmount,
+      'licAmount': licAmount,
       'createdAt': Timestamp.fromDate(createdAt),
       'odDays': odDays,
       'tdsAmount': tdsAmount,
@@ -72,7 +75,7 @@ class StaffModel {
       (map['baseSalary'] ?? 0)
           .toDouble(),
 
-      clBalance: map['clBalance'] ?? 12,
+      clBalance: map['clBalance'] ?? 12.toDouble(),
 
       pfEnabled:
       map['pfEnabled'] ?? false,
@@ -83,6 +86,9 @@ class StaffModel {
       rdAmount:
       (map['rdAmount'] ?? 0)
           .toDouble(),
+
+      licAmount:
+      (map['licAmount'] ?? 0).toDouble(),
 
       createdAt:
       (map['createdAt'] as Timestamp?)
@@ -105,10 +111,11 @@ class StaffModel {
     DateTime? dateOfJoining,
     int? experience,
     double? baseSalary,
-    int? clBalance,
+    double? clBalance,
     bool? pfEnabled,
     bool? esiEnabled,
     double? rdAmount,
+    double? licAmount,
     DateTime? createdAt,
     int? odDays,
     double? tdsAmount,
@@ -135,6 +142,8 @@ class StaffModel {
       esiEnabled ?? this.esiEnabled,
       rdAmount:
       rdAmount ?? this.rdAmount,
+      licAmount:
+      licAmount ?? this.licAmount,
       createdAt:
       createdAt ?? this.createdAt,
       odDays: odDays ?? this.odDays,

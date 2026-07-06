@@ -251,7 +251,7 @@ class _StaffScreenState
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                     child: DataTable(
-                      columnSpacing: 55,
+                      columnSpacing: 45,
                       horizontalMargin: 15,
 
                       headingRowHeight: 50,
@@ -286,11 +286,15 @@ class _StaffScreenState
                         ),
 
                         DataColumn(
-                          label: tableHeader('OD'),
+                          label: tableHeader('LIC'),
                         ),
 
                         DataColumn(
                           label: tableHeader('TDS'),
+                        ),
+
+                        DataColumn(
+                          label: tableHeader('OD'),
                         ),
 
                         DataColumn(
@@ -355,15 +359,25 @@ class _StaffScreenState
 
                             DataCell(
                               Text(
-                                '${staff.odDays}',
+                                staff.licAmount > 0
+                                    ? '₹${staff.licAmount}'
+                                    : '--',
                               ),
                             ),
+
+
 
                             DataCell(
                               Text(
                                 staff.tdsAmount > 0
                                     ? '₹${staff.tdsAmount}'
                                     : '--',
+                              ),
+                            ),
+
+                            DataCell(
+                              Text(
+                                '${staff.odDays}',
                               ),
                             ),
 
@@ -474,8 +488,10 @@ class _StaffScreenState
                                                   ),
 
                                                   detailRow(
-                                                    'OD Days',
-                                                    '${staff.odDays}',
+                                                    'LIC Amount',
+                                                    staff.licAmount > 0
+                                                        ? '₹${staff.licAmount}'
+                                                        : '--',
                                                   ),
 
                                                   detailRow(
@@ -483,6 +499,11 @@ class _StaffScreenState
                                                     staff.tdsAmount > 0
                                                         ? '₹${staff.tdsAmount}'
                                                         : '--',
+                                                  ),
+
+                                                  detailRow(
+                                                    'OD Days',
+                                                    '${staff.odDays}',
                                                   ),
 
                                                   detailRow(

@@ -25,6 +25,41 @@ class PayrollPdfService {
           (sum, item) => sum + item.finalSalary,
     );
 
+    final totalGross = records.fold<double>(
+      0,
+          (sum, item) => sum + item.grossSalary,
+    );
+
+    final totalPf = records.fold<double>(
+      0,
+          (sum, item) => sum + item.pfAmount,
+    );
+
+    final totalEsi = records.fold<double>(
+      0,
+          (sum, item) => sum + item.esiAmount,
+    );
+
+    final totalRd = records.fold<double>(
+      0,
+          (sum, item) => sum + item.rdAmount,
+    );
+
+    final totalLic = records.fold<double>(
+      0,
+          (sum, item) => sum + item.licAmount,
+    );
+
+    final totalTds = records.fold<double>(
+      0,
+          (sum, item) => sum + item.tdsAmount,
+    );
+
+    final totalNetSalary = records.fold<double>(
+      0,
+          (sum, item) => sum + item.finalSalary,
+    );
+
     pdf.addPage(
 
       pw.MultiPage(
@@ -129,53 +164,79 @@ class PayrollPdfService {
 
                 'Gross Salary',
 
-                'LOP',
-
                 'PF',
 
                 'ESI',
 
                 'RD',
 
-                'TDS',
+                'LIC',
 
-                'LLP',
+                'TDS',
 
                 'Net Salary',
 
               ],
 
-              data: records.map((salary) {
+              data: [
 
-                return [
+                ...records.map((salary) {
 
-                  salary.staffId,
+                  return [
 
-                  salary.staffName,
+                    salary.staffId,
 
-                  salary.bankAccountNumber,
+                    salary.staffName,
 
-                  salary.grossSalary.toStringAsFixed(0),
+                    salary.bankAccountNumber,
 
-                  salary.lopAmount.toStringAsFixed(0),
+                    salary.grossSalary.toStringAsFixed(0),
 
-                  salary.pfAmount.toStringAsFixed(0),
+                    salary.pfAmount.toStringAsFixed(0),
 
-                  salary.esiAmount.toStringAsFixed(2),
+                    salary.esiAmount.toStringAsFixed(2),
 
-                  salary.rdAmount.toStringAsFixed(0),
+                    salary.rdAmount.toStringAsFixed(0),
 
-                  salary.tdsAmount.toStringAsFixed(0),
+                    salary.licAmount.toStringAsFixed(0),
 
-                  salary.llpDays.toString(),
+                    salary.tdsAmount.toStringAsFixed(0),
 
-                  salary.finalSalary.toStringAsFixed(0),
+                    salary.finalSalary.toStringAsFixed(0),
 
-                ];
+                  ];
 
-              }).toList(),
+                }),
+
+                [
+
+                  'TOTAL',
+
+                  '',
+
+                  '',
+
+                  totalGross.toStringAsFixed(0),
+
+                  totalPf.toStringAsFixed(0),
+
+                  totalEsi.toStringAsFixed(2),
+
+                  totalRd.toStringAsFixed(0),
+
+                  totalLic.toStringAsFixed(0),
+
+                  totalTds.toStringAsFixed(0),
+
+                  totalNetSalary.toStringAsFixed(0),
+
+                ],
+
+              ],
 
             ),
+
+
 
             pw.SizedBox(height: 20),
 

@@ -389,9 +389,7 @@ class _SalaryHistoryScreenState
 
                                 dataRowMaxHeight: 55,
 
-                                columnSpacing: 65,
-
-
+                                columnSpacing: 50,
                                 columns: const [
 
                                   DataColumn(
@@ -425,6 +423,10 @@ class _SalaryHistoryScreenState
 
                                   DataColumn(
                                     label: Text('RD'),
+                                  ),
+
+                                  DataColumn(
+                                    label: Text('LIC'),
                                   ),
 
                                   DataColumn(
@@ -486,6 +488,12 @@ class _SalaryHistoryScreenState
                                       DataCell(
                                         Text(
                                           '₹${salary.rdAmount.toStringAsFixed(0)}',
+                                        ),
+                                      ),
+
+                                      DataCell(
+                                        Text(
+                                          '₹${salary.licAmount.toStringAsFixed(0)}',
                                         ),
                                       ),
 

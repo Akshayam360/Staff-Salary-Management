@@ -41,6 +41,9 @@ class _EditStaffDialogState
   rdController;
 
   late TextEditingController
+  licController;
+
+  late TextEditingController
   odController;
 
   late TextEditingController
@@ -83,6 +86,12 @@ class _EditStaffDialogState
     rdController =
         TextEditingController(
           text: widget.staff.rdAmount
+              .toString(),
+        );
+
+    licController =
+        TextEditingController(
+          text: widget.staff.licAmount
               .toString(),
         );
 
@@ -245,15 +254,10 @@ class _EditStaffDialogState
 
                   Expanded(
                     child: TextField(
-                      controller:
-                      rdController,
-                      keyboardType:
-                      TextInputType
-                          .number,
-                      decoration:
-                      const InputDecoration(
-                        labelText:
-                        'RD Amount',
+                      controller: odController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'OD Days',
                       ),
                     ),
                   ),
@@ -267,10 +271,33 @@ class _EditStaffDialogState
 
                   Expanded(
                     child: TextField(
-                      controller: odController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'OD Days',
+                      controller:
+                      rdController,
+                      keyboardType:
+                      TextInputType
+                          .number,
+                      decoration:
+                      const InputDecoration(
+                        labelText:
+                        'RD Amount',
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(
+                      width: 20),
+
+                  Expanded(
+                    child: TextField(
+                      controller:
+                      licController,
+                      keyboardType:
+                      TextInputType
+                          .number,
+                      decoration:
+                      const InputDecoration(
+                        labelText:
+                        'LIC Amount',
                       ),
                     ),
                   ),
@@ -387,7 +414,7 @@ class _EditStaffDialogState
                         ),
 
                         clBalance:
-                        int.parse(
+                        double.parse(
                           clController
                               .text,
                         ),
@@ -397,6 +424,13 @@ class _EditStaffDialogState
                           rdController
                               .text,
                         ),
+
+                        licAmount:
+                        double.parse(
+                          licController
+                              .text,
+                        ),
+
                         odDays:
                         int.parse(
                           odController.text,

@@ -77,7 +77,7 @@ class StaffService {
   }
   Future<void> updateLeaveBalance({
     required String documentId,
-    required int clBalance,
+    required double clBalance,
     required int odDays,
   }) async {
 
