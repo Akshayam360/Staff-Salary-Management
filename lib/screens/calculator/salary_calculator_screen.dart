@@ -77,7 +77,7 @@ class _SalaryCalculatorScreenState
             0;
 
     final odUsed =
-        int.tryParse(
+        double.tryParse(
           odController.text,
         ) ??
             0;
@@ -384,7 +384,7 @@ class _SalaryCalculatorScreenState
             0,
 
         'odUsed':
-        int.tryParse(
+        double.tryParse(
           odController.text,
         ) ??
             0,
@@ -1396,17 +1396,31 @@ class _SalaryCalculatorScreenState
                                   history,
                                 );
 
+                                debugPrint('Current CL : ${selectedStaff!.clBalance}');
+                                debugPrint('CL Used : ${double.parse(clController.text)}');
+                                debugPrint('LCL Deduction : $lclClDeduction');
+                                debugPrint('Current OD : ${selectedStaff!.odDays}');
+                                debugPrint('OD Used : ${double.parse(odController.text)}');
+
+                                debugPrint(
+                                  'New CL : ${selectedStaff!.clBalance - double.parse(clController.text) - lclClDeduction}',
+                                );
+
+                                debugPrint(
+                                  'New OD : ${selectedStaff!.odDays - double.parse(odController.text)}',
+                                );
+
                                 await staffService.updateLeaveBalance(
 
                                   documentId: selectedStaff!.id,
 
                                   clBalance:
                                   selectedStaff!.clBalance -
-                                      int.parse(clController.text) -
+                                      double.parse(clController.text) -
                                       lclClDeduction,
                                   odDays:
                                   selectedStaff!.odDays -
-                                      int.parse(odController.text),
+                                      double.parse(odController.text),
 
                                 );
 
@@ -1416,11 +1430,11 @@ class _SalaryCalculatorScreenState
 
                                     clBalance:
                                     selectedStaff!.clBalance -
-                                        int.parse(clController.text),
+                                        double.parse(clController.text),
 
                                     odDays:
                                     selectedStaff!.odDays -
-                                        int.parse(odController.text),
+                                        double.parse(odController.text),
                                   );
 
                                 });

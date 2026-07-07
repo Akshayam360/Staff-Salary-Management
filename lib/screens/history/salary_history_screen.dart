@@ -644,31 +644,55 @@ class _SalaryHistoryScreenState
 
     try {
 
+
+
       final staffSnapshot =
       await FirebaseFirestore.instance
-          .collection('staffs')
+          .collection('staff')
           .where(
         'staffId',
         isEqualTo: salary.staffId,
       )
+          .limit(1)
           .get();
 
       if (staffSnapshot.docs.isNotEmpty) {
 
-        final staffDoc =
-            staffSnapshot.docs.first;
+        double lclRestore = 0;
 
-        final currentCl =
-        staffDoc['clBalance'];
+        if (salary.lclDays >= 5 && salary.lclDays <= 7) {
+          lclRestore = 0.5;
+        } else if (salary.lclDays >= 8 && salary.lclDays <= 10) {
+          lclRestore = 1.0;
+        } else if (salary.lclDays >= 11 && salary.lclDays <= 13) {
+          lclRestore = 1.5;
+        } else if (salary.lclDays >= 14 && salary.lclDays <= 16) {
+          lclRestore = 2.0;
+        } else if (salary.lclDays >= 17 && salary.lclDays <= 19) {
+          lclRestore = 2.5;
+        }else if (salary.lclDays >= 20 && salary.lclDays <= 22) {
+          lclRestore = 3.0;
+        } else if (salary.lclDays >= 23 && salary.lclDays <= 25) {
+          lclRestore = 3.5;
+        } else if (salary.lclDays >= 26 && salary.lclDays <= 28) {
+          lclRestore = 4.0;
+        } else if (salary.lclDays >= 29 && salary.lclDays <= 31) {
+          lclRestore = 4.5;
+        }
 
-        final currentOd =
-        staffDoc['odDays'];
+        double totalClRestore =
+            salary.clUsed + lclRestore;
 
-        await staffService.updateLeaveBalance(
-          documentId: staffDoc.id,
-          clBalance: currentCl + salary.clUsed.toInt(),
-          odDays: currentOd + salary.odUsed.toInt(),
+        await StaffService().restoreLeaveBalance(
+
+          documentId: staffSnapshot.docs.first.id,
+
+          clToRestore: totalClRestore,
+
+          odToRestore: salary.odUsed,
+
         );
+
       }
 
       await salaryHistoryService

@@ -469,7 +469,7 @@ class _EditStaffDialogState
                         ),
 
                         odDays:
-                        int.parse(
+                        double.parse(
                           odController.text,
                         ),
 

@@ -393,7 +393,7 @@ class _AddStaffDialogState
                       licAmount:
                       double.tryParse(licController.text) ?? 0,
                       odDays:
-                      int.parse(odController.text),
+                      double.parse(odController.text),
                       tdsAmount:
                       double.tryParse(tdsController.text) ?? 0,
                       createdAt: DateTime.now(),

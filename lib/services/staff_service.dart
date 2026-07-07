@@ -78,7 +78,7 @@ class StaffService {
   Future<void> updateLeaveBalance({
     required String documentId,
     required double clBalance,
-    required int odDays,
+    required double odDays,
   }) async {
 
     await _firestore
@@ -89,6 +89,39 @@ class StaffService {
       'clBalance': clBalance,
 
       'odDays': odDays,
+    });
+  }
+
+  Future<void> restoreLeaveBalance({
+    required String documentId,
+    required double clToRestore,
+    required double odToRestore,
+  }) async {
+
+    final doc = await _firestore
+        .collection('staff')
+        .doc(documentId)
+        .get();
+
+    if (!doc.exists) return;
+
+    final data = doc.data()!;
+
+    final currentCL =
+    (data['clBalance'] ?? 0).toDouble();
+
+    final currentOD =
+    (data['odDays'] ?? 0);
+
+    await _firestore
+        .collection('staff')
+        .doc(documentId)
+        .update({
+
+      'clBalance': currentCL + clToRestore,
+
+      'odDays': currentOD + odToRestore,
+
     });
   }
 

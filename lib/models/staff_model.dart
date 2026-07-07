@@ -14,7 +14,7 @@ class StaffModel {
   final double rdAmount;
   final double licAmount;
   final DateTime createdAt;
-  final int odDays;
+  final double odDays;
   final double tdsAmount;
 
   StaffModel({
@@ -95,7 +95,7 @@ class StaffModel {
           ?.toDate() ??
           DateTime.now(),
 
-      odDays: map['odDays'] ?? 15,
+      odDays: map['odDays'] ?? 15.toDouble(),
 
       tdsAmount:
       (map['tdsAmount'] ?? 0)
@@ -117,7 +117,7 @@ class StaffModel {
     double? rdAmount,
     double? licAmount,
     DateTime? createdAt,
-    int? odDays,
+    double? odDays,
     double? tdsAmount,
   }) {
     return StaffModel(
