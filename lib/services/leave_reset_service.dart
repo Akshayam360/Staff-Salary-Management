@@ -11,14 +11,34 @@ class LeaveResetService {
         .collection('system_settings')
         .doc('leave_reset');
 
-    final settingsSnapshot =
-    await settingsDoc.get();
+    final snapshot = await settingsDoc.get();
 
-    int lastClResetYear = 0;
-    int lastOdResetYear = 0;
+    int lastClResetYear;
+    int lastOdResetYear;
 
-    if (settingsSnapshot.exists) {
-      final data = settingsSnapshot.data()!;
+    // Current OD Cycle
+    // June 2026 - May 2027 => 2026
+    // June 2027 - May 2028 => 2027
+
+    final currentOdCycle =
+    now.month >= 6
+        ? now.year
+        : now.year - 1;
+
+    if (!snapshot.exists) {
+      // First time setup
+
+      lastClResetYear = now.year - 1;
+      lastOdResetYear = currentOdCycle - 1;
+
+      await settingsDoc.set({
+        'lastClResetYear': lastClResetYear,
+        'lastOdResetYear': lastOdResetYear,
+      });
+
+      print("System settings document created");
+    } else {
+      final data = snapshot.data()!;
 
       lastClResetYear =
           data['lastClResetYear'] ?? 0;
@@ -27,50 +47,82 @@ class LeaveResetService {
           data['lastOdResetYear'] ?? 0;
     }
 
-    // CL Reset (January)
+    // -----------------------------
+    // CL RESET
+    // -----------------------------
 
-    if (now.month == 1 &&
-        lastClResetYear != now.year) {
+    if (lastClResetYear < now.year) {
+
       await _resetCl();
 
-      await settingsDoc.set({
-        'lastClResetYear': now.year,
-        'lastOdResetYear': lastOdResetYear,
+      lastClResetYear = now.year;
+
+      await settingsDoc.update({
+        'lastClResetYear':
+        lastClResetYear,
       });
     }
 
-    // OD Reset (June)
+    // -----------------------------
+    // OD RESET
+    // -----------------------------
 
-    if (now.month == 6 &&
-        lastOdResetYear != now.year) {
+    if (lastOdResetYear <
+        currentOdCycle) {
+
       await _resetOd();
 
-      await settingsDoc.set({
-        'lastClResetYear': lastClResetYear,
-        'lastOdResetYear': now.year,
+      lastOdResetYear =
+          currentOdCycle;
+
+      await settingsDoc.update({
+        'lastOdResetYear':
+        lastOdResetYear,
       });
     }
   }
 
   Future<void> _resetCl() async {
-    final staffs =
-    await _firestore.collection('staff').get();
 
-    for (final doc in staffs.docs) {
-      await doc.reference.update({
-        'clBalance': 12.0,
-      });
+    final snapshot =
+    await _firestore
+        .collection('staff')
+        .get();
+
+    final batch =
+    _firestore.batch();
+
+    for (final doc in snapshot.docs) {
+      batch.update(
+        doc.reference,
+        {
+          'clBalance': 12.0,
+        },
+      );
     }
+
+    await batch.commit();
   }
 
   Future<void> _resetOd() async {
-    final staffs =
-    await _firestore.collection('staff').get();
 
-    for (final doc in staffs.docs) {
-      await doc.reference.update({
-        'odDays': 15.0,
-      });
+    final snapshot =
+    await _firestore
+        .collection('staff')
+        .get();
+
+    final batch =
+    _firestore.batch();
+
+    for (final doc in snapshot.docs) {
+      batch.update(
+        doc.reference,
+        {
+          'odDays': 15.0,
+        },
+      );
     }
+
+    await batch.commit();
   }
 }

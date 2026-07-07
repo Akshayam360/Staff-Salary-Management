@@ -18,8 +18,26 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState
     extends State<DashboardScreen> {
 
+  final LeaveResetService leaveResetService =
+  LeaveResetService();
+
 
   int selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future(() async {
+
+      print("Calling Leave Reset Service...");
+
+      await leaveResetService.checkAndResetLeaves();
+
+      print("Leave Reset Service Completed");
+
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
