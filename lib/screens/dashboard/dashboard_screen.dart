@@ -29,13 +29,7 @@ class _DashboardScreenState
     super.initState();
 
     Future(() async {
-
-      print("Calling Leave Reset Service...");
-
       await leaveResetService.checkAndResetLeaves();
-
-      print("Leave Reset Service Completed");
-
     });
   }
 
