@@ -77,8 +77,11 @@ class SalaryHistoryModel {
       map['bankAccountNumber'] ?? '',
       month: map['month'] ?? '',
       workingDays: map['workingDays'] ?? 0,
-      presentDays: map['presentDays'] ?? 0.toDouble(),
-      absentDays: map['absentDays'] ?? 0.toDouble(),
+      presentDays:
+      (map['presentDays'] ?? 0).toDouble(),
+
+      absentDays:
+      (map['absentDays'] ?? 0).toDouble(),
       clUsed: (map['clUsed'] ?? 0).toDouble(),
       odUsed: (map['odUsed'] ?? 0).toDouble(),
       lodDays: map['lodDays'] ?? 0,

@@ -69,13 +69,14 @@ class StaffModel {
           ?.toDate() ??
           DateTime.now(),
 
-      experience: map['experience'] ?? 0,
+      experience:
+      (map['experience'] ?? 0) as int,
 
       baseSalary:
-      (map['baseSalary'] ?? 0)
-          .toDouble(),
+      (map['baseSalary'] ?? 0).toDouble(),
 
-      clBalance: map['clBalance'] ?? 12.toDouble(),
+      clBalance:
+      (map['clBalance'] ?? 12).toDouble(),
 
       pfEnabled:
       map['pfEnabled'] ?? false,
@@ -84,22 +85,22 @@ class StaffModel {
       map['esiEnabled'] ?? false,
 
       rdAmount:
-      (map['rdAmount'] ?? 0)
-          .toDouble(),
+      (map['rdAmount'] ?? 0).toDouble(),
 
       licAmount:
       (map['licAmount'] ?? 0).toDouble(),
+
 
       createdAt:
       (map['createdAt'] as Timestamp?)
           ?.toDate() ??
           DateTime.now(),
 
-      odDays: map['odDays'] ?? 15.toDouble(),
+      odDays:
+      (map['odDays'] ?? 15).toDouble(),
 
       tdsAmount:
-      (map['tdsAmount'] ?? 0)
-          .toDouble(),
+      (map['tdsAmount'] ?? 0).toDouble(),
     );
   }
 

@@ -249,6 +249,17 @@ class _SalaryHistoryScreenState
                     );
                   }
 
+                  if (snapshot.hasError) {
+                    print(snapshot.error);
+                    print(snapshot.stackTrace);
+
+                    return Center(
+                      child: Text(snapshot.error.toString()),
+                    );
+                  }
+
+
+
                   if (!snapshot.hasData ||
                       snapshot.data!.isEmpty) {
                     return const Center(
