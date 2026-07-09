@@ -4,7 +4,7 @@ import '../../models/staff_model.dart';
 import '../../services/staff_service.dart';
 import '../../services/salary_history_service.dart';
 import '../../models/salary_history_model.dart';
-import '../../utils/salary_calculator.dart';
+
 
 class SalaryCalculatorScreen
     extends StatefulWidget {
@@ -305,12 +305,26 @@ class _SalaryCalculatorScreenState
       return;
     }
 
+    final clUsed =
+        double.tryParse(
+          clController.text,
+        ) ??
+            0.0;
+
     final salaryPerDay =
         selectedStaff!.baseSalary /
             totalWorkingDays;
 
+    double remainingAbsentDays =
+        (totalWorkingDays - presentDays) -
+            clUsed;
+
+    if (remainingAbsentDays < 0) {
+      remainingAbsentDays = 0;
+    }
+
     double absentDeduction =
-        (totalWorkingDays - presentDays) *
+        remainingAbsentDays *
             salaryPerDay;
 
     double llpDeduction =
