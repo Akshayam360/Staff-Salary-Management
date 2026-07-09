@@ -23,8 +23,20 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class _DesktopLoginView extends StatelessWidget {
+class _DesktopLoginView extends StatefulWidget {
   const _DesktopLoginView();
+
+  @override
+  State<_DesktopLoginView> createState() =>
+      _DesktopLoginViewState();
+}
+
+class _DesktopLoginViewState
+    extends State<_DesktopLoginView> {
+
+  bool obscurePassword = true;
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -151,12 +163,41 @@ class _DesktopLoginView extends StatelessWidget {
                       controller: emailController,
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
+                    const Text('Password'),
 
-                    CustomTextField(
-                      hintText: 'Password',
+                    const SizedBox(height: 10),
+                    TextField(
                       controller: passwordController,
-                      obscureText: true,
+                      obscureText: obscurePassword,
+                      decoration: InputDecoration(
+                        hintText: 'Password',
+
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              obscurePassword = !obscurePassword;
+                            });
+                          },
+                        ),
+
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
 
                     const SizedBox(height: 30),
