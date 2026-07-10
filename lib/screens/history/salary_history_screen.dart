@@ -15,6 +15,8 @@ class SalaryHistoryScreen extends StatefulWidget {
       _SalaryHistoryScreenState();
 }
 
+final ScrollController _horizontalController = ScrollController();
+
 class _SalaryHistoryScreenState
     extends State<SalaryHistoryScreen> {
 
@@ -382,9 +384,18 @@ class _SalaryHistoryScreenState
 
                             const SizedBox(height: 20),
 
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: DataTable(
+                            Scrollbar(
+                            controller: _horizontalController,
+                            thumbVisibility: true,
+                            interactive: true,
+                            child: SingleChildScrollView(
+                            controller: _horizontalController,
+                            scrollDirection: Axis.horizontal,
+                            child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                            minWidth: 1600,
+                            ),
+                            child: DataTable(
 
                                 headingRowColor: WidgetStateProperty.all(
                                   const Color(0xFF37474F),
@@ -393,14 +404,14 @@ class _SalaryHistoryScreenState
                                 headingTextStyle: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 15,
+                                  fontSize: 20,
                                 ),
 
                                 dataRowMinHeight: 55,
 
                                 dataRowMaxHeight: 55,
 
-                                columnSpacing: 50,
+                                columnSpacing: 5,
                                 columns: const [
 
                                   DataColumn(
@@ -557,7 +568,11 @@ class _SalaryHistoryScreenState
                                 }).toList(),
                               ),
                             ),
+                            ),
+                            ),
+
                           ],
+
                         ),
                       );
 

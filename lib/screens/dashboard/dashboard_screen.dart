@@ -58,7 +58,7 @@ class _DashboardScreenState
   }
   Widget _buildDashboardContent() {
     return Padding(
-      padding: const EdgeInsets.all(100),
+      padding: const EdgeInsets.all(85),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

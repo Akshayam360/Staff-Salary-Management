@@ -8,10 +8,14 @@ import '../../widgets/edit_staff_dialog.dart';
 class StaffScreen extends StatefulWidget {
   const StaffScreen({super.key});
 
+
+
   @override
   State<StaffScreen> createState() =>
       _StaffScreenState();
 }
+final ScrollController _horizontalController = ScrollController();
+final ScrollController _verticalController = ScrollController();
 
 class _StaffScreenState
     extends State<StaffScreen> {
@@ -71,6 +75,24 @@ class _StaffScreenState
         ],
       ),
     );
+  }
+
+  String getExperience(DateTime joiningDate) {
+    final now = DateTime.now();
+
+    int years = now.year - joiningDate.year;
+    int months = now.month - joiningDate.month;
+
+    if (now.day < joiningDate.day) {
+      months--;
+    }
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    return '$years Yrs $months Months';
   }
 
   @override
@@ -179,9 +201,8 @@ class _StaffScreenState
 
           const SizedBox(height: 25),
 
-      Flexible(
-        fit: FlexFit.loose,
-        child: Container(
+          Expanded(
+            child: Container(
 
 
               padding: const EdgeInsets.all(20),
@@ -257,18 +278,26 @@ class _StaffScreenState
                     );
                   }
 
-                  return SingleChildScrollView(
+                  return Scrollbar(
+                    controller: _horizontalController,
+                    thumbVisibility: true,
+                    interactive: true,
                       child: SingleChildScrollView(
+                        controller: _horizontalController,
                         scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columnSpacing: 45,
-                      horizontalMargin: 15,
-
-                      headingRowHeight: 50,
-                      headingRowColor:
-                      WidgetStateProperty.all(
-                        const Color(0xFFF7F8FA),
-                      ),
+                    child: SingleChildScrollView(
+                      controller: _verticalController,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          minWidth: 1700, // adjust if needed
+                        ),
+                      child: DataTable(
+                        columnSpacing: 45,
+                        horizontalMargin: 15,
+                        headingRowHeight: 50,
+                        headingRowColor: WidgetStateProperty.all(
+                          const Color(0xFFF7F8FA),
+                        ),
                       columns: [
                         DataColumn(
                           label: tableHeader('Staff ID'),
@@ -335,7 +364,7 @@ class _StaffScreenState
 
                             DataCell(
                               Text(
-                                '${staff.experience} Yrs',
+                                getExperience(staff.dateOfJoining),
                               ),
                             ),
 
@@ -463,7 +492,7 @@ class _StaffScreenState
 
                                                   detailRow(
                                                     'Experience',
-                                                    '${staff.experience} Years',
+                                                    getExperience(staff.dateOfJoining),
                                                   ),
 
                                                   detailRow(
@@ -607,6 +636,8 @@ class _StaffScreenState
                         );
                       }).toList(),
                     ),
+                      ),
+                      ),
                       ),
                   );
                 },

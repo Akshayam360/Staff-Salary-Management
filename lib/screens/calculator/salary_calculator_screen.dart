@@ -13,11 +13,15 @@ class SalaryCalculatorScreen
     super.key,
   });
 
+
+
   @override
   State<SalaryCalculatorScreen>
   createState() =>
       _SalaryCalculatorScreenState();
 }
+
+final ScrollController horizontalController = ScrollController();
 class _SalaryCalculatorScreenState
     extends State<
         SalaryCalculatorScreen> {
@@ -619,10 +623,19 @@ class _SalaryCalculatorScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
-      body: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
+        backgroundColor: const Color(0xFFF7F8FA),
+        body: Scrollbar(
+          controller: horizontalController,
+          thumbVisibility: true,
+          interactive: true,
+          child: SingleChildScrollView(
+            controller: horizontalController,
+            scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: 1800,
+                  child: Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Column(
           crossAxisAlignment:
           CrossAxisAlignment.start,
           children: [
@@ -648,22 +661,30 @@ class _SalaryCalculatorScreenState
         const SizedBox(height: 30),
 
         Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-
-            Expanded(
-            flex: 4,
-            child: Container(
-              padding: const EdgeInsets.all(25),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-
-              child: Column(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: 1600,
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+              Expanded(
+                flex: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(25),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    interactive: true,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
 
                   Row(
                     children: [
@@ -1252,6 +1273,9 @@ class _SalaryCalculatorScreenState
 
 
                 ],
+                      ),
+                    ),
+
               ),
             ),
             ),
@@ -1700,10 +1724,15 @@ class _SalaryCalculatorScreenState
               ),
               ),
           ],
+              ),
+            ),
 
         ),
       ),
           ],
+                    ),
+                  ),
+                ),
         ),
       ),
     );
