@@ -87,19 +87,19 @@ class _SalaryCalculatorScreenState
             0;
 
     final lodUsed =
-        int.tryParse(
+        double.tryParse(
           lodController.text,
         ) ??
             0;
 
     final lclUsed =
-        int.tryParse(
+        double.tryParse(
           lclController.text,
         ) ??
             0;
 
     final llpUsed =
-        int.tryParse(
+        double.tryParse(
           llpController.text,
         ) ??
             0;
@@ -164,7 +164,7 @@ class _SalaryCalculatorScreenState
         } else {
 
           // First 2 late entries are free
-          int chargeableLate = lclUsed - 2;
+          double chargeableLate = lclUsed - 2;
 
           // Only complete groups of 3 are considered
           int completedGroups =
@@ -184,30 +184,24 @@ class _SalaryCalculatorScreenState
 
       // LLP Validation
 
-      if (selectedStaff!.clBalance > 0) {
+      // LLP Validation — always active now
 
-        llpError =
-        'LLP disabled (CL Available)';
+      llpError = null;
+
+      if (llpUsed <= 2) {
 
         llpSalaryDeduction = 0;
 
       } else {
 
-        if (llpUsed <= 2) {
+        double chargeableLate =
+            llpUsed - 2;
 
-          llpSalaryDeduction = 0;
+        int completedGroups =
+            chargeableLate ~/ 3;
 
-        } else {
-
-          int chargeableLate =
-              llpUsed - 2;
-
-          int completedGroups =
-              chargeableLate ~/ 3;
-
-          llpSalaryDeduction =
-              completedGroups * 0.5;
-        }
+        llpSalaryDeduction =
+            completedGroups * 0.5;
       }
     });
   }
@@ -262,24 +256,17 @@ class _SalaryCalculatorScreenState
   }
 
   void updateLclAndLlpStatus() {
-
     if (selectedStaff == null) return;
 
     setState(() {
-
       if (selectedStaff!.clBalance <= 0) {
-
         lclEnabled = false;
-        llpEnabled = true;
-
       } else {
-
         lclEnabled = true;
-        llpEnabled = false;
       }
 
+      llpEnabled = true; // LLP always enabled now
     });
-
   }
 
   double calculateLateDeductionDays(
@@ -408,19 +395,19 @@ class _SalaryCalculatorScreenState
             0,
 
         'lod':
-        int.tryParse(
+        double.tryParse(
           lodController.text,
         ) ??
             0,
 
         'lcl':
-        int.tryParse(
+        double.tryParse(
           lclController.text,
         ) ??
             0,
 
         'llp':
-        int.tryParse(
+        double.tryParse(
           llpController.text,
         ) ??
             0,
@@ -722,8 +709,29 @@ class _SalaryCalculatorScreenState
                           }).toList(),
                           onChanged: (value) {
                             setState(() {
-                              selectedMonth =
-                              value!;
+                              selectedMonth = value!;
+
+                              final parts = selectedMonth.split(' ');
+                              final monthName = parts[0];
+                              final year = int.parse(parts[1]);
+
+                              const monthNames = [
+                                'January', 'February', 'March', 'April',
+                                'May', 'June', 'July', 'August',
+                                'September', 'October', 'November', 'December',
+                              ];
+
+                              final monthNumber = monthNames.indexOf(monthName) + 1;
+
+                              totalWorkingDays = DateUtils.getDaysInMonth(
+                                year,
+                                monthNumber,
+                              );
+
+                              presentDays = totalWorkingDays.toDouble();
+
+                              workingDaysController.text = totalWorkingDays.toString();
+                              presentDaysController.text = presentDays.toString();
                             });
                           },
                         ),
@@ -1399,11 +1407,11 @@ class _SalaryCalculatorScreenState
 
                                   odUsed: double.parse(odController.text),
 
-                                  lodDays: int.parse(lodController.text),
+                                  lodDays: double.parse(lodController.text),
 
-                                  lclDays: int.parse(lclController.text),
+                                  lclDays: double.parse(lclController.text),
 
-                                  llpDays: int.parse(llpController.text),
+                                  llpDays: double.parse(llpController.text),
 
                                   grossSalary: result!['grossSalary'],
 

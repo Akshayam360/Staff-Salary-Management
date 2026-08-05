@@ -13,9 +13,9 @@ class SalaryHistoryModel {
 
   final double clUsed;
   final double odUsed;
-  final int lodDays;
-  final int lclDays;
-  final int llpDays;
+  final double lodDays;
+  final double lclDays;
+  final double llpDays;
 
   final double grossSalary;
   final double perDaySalary;
@@ -84,9 +84,9 @@ class SalaryHistoryModel {
       (map['absentDays'] ?? 0).toDouble(),
       clUsed: (map['clUsed'] ?? 0).toDouble(),
       odUsed: (map['odUsed'] ?? 0).toDouble(),
-      lodDays: map['lodDays'] ?? 0,
-      lclDays: map['lclDays'] ?? 0,
-      llpDays: map['llpDays'] ?? 0,
+      lodDays: (map['lodDays'] ?? 0).toDouble(),
+      lclDays: (map['lclDays'] ?? 0).toDouble(),
+      llpDays: (map['llpDays'] ?? 0).toDouble(),
       grossSalary: (map['grossSalary'] ?? 0).toDouble(),
       perDaySalary: (map['perDaySalary'] ?? 0).toDouble(),
       lopAmount: (map['lopAmount'] ?? 0).toDouble(),
@@ -150,9 +150,9 @@ class SalaryHistoryModel {
     double? absentDays,
     double? clUsed,
     double? odUsed,
-    int? lodDays,
-    int? lclDays,
-    int? llpDays,
+    double? lodDays,
+    double? lclDays,
+    double? llpDays,
     double? grossSalary,
     double? perDaySalary,
     double? lopAmount,

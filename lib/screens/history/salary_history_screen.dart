@@ -317,6 +317,12 @@ class _SalaryHistoryScreenState
                     groupedHistory[history.month]!.add(history);
                   }
 
+                  for (final records in groupedHistory.values) {
+                    records.sort(
+                          (a, b) => a.staffId.compareTo(b.staffId),
+                    );
+                  }
+
                   return ListView(
                     children: groupedHistory.entries.map((entry) {
 
