@@ -292,14 +292,10 @@ class PayrollPdfService {
 
               ),
 
-              cellStyle: const pw.TextStyle(
-
+              cellStyle: pw.TextStyle(
                 fontSize: 9,
-
                 fontWeight: pw.FontWeight.bold,
-
               ),
-
               headerHeight: 25,
 
               cellHeight: 22,
