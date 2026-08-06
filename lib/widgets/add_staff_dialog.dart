@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/staff_model.dart';
 import '../../../services/staff_service.dart';
+import '../../../utils/department_list.dart';
 
 class AddStaffDialog extends StatefulWidget {
   const AddStaffDialog({super.key});
@@ -9,6 +10,7 @@ class AddStaffDialog extends StatefulWidget {
   State<AddStaffDialog> createState() =>
       _AddStaffDialogState();
 }
+String selectedDepartment = kDepartments.first;
 
 class _AddStaffDialogState
     extends State<AddStaffDialog> {
@@ -139,6 +141,26 @@ class _AddStaffDialogState
                   ),
                 ),
               ],
+            ),
+
+            const SizedBox(height: 20),
+
+            DropdownButtonFormField<String>(
+              value: selectedDepartment,
+              decoration: const InputDecoration(
+                labelText: 'Department',
+              ),
+              items: kDepartments.map((dept) {
+                return DropdownMenuItem(
+                  value: dept,
+                  child: Text(dept),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedDepartment = value!;
+                });
+              },
             ),
 
             const SizedBox(height: 20),
@@ -378,6 +400,7 @@ class _AddStaffDialogState
                       id: '',
                       staffId: staffIdController.text.trim().toUpperCase(),
                       name: nameController.text.trim(),
+                      department: selectedDepartment,
                       bankAccountNumber:
                       bankAccountController.text.trim(),
                       dateOfJoining: joiningDate!,

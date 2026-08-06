@@ -4,6 +4,7 @@ class StaffModel {
   final String id;
   final String staffId;
   final String name;
+  final String department;
   final String bankAccountNumber;
   final DateTime dateOfJoining;
   final int experience;
@@ -21,6 +22,7 @@ class StaffModel {
     required this.id,
     required this.staffId,
     required this.name,
+    required this.department,
     required this.bankAccountNumber,
     required this.dateOfJoining,
     required this.experience,
@@ -39,6 +41,7 @@ class StaffModel {
     return {
       'staffId': staffId,
       'name': name,
+      'department': department,
       'bankAccountNumber': bankAccountNumber,
       'dateOfJoining': Timestamp.fromDate(dateOfJoining),
       'experience': experience,
@@ -62,6 +65,7 @@ class StaffModel {
       id: id,
       staffId: map['staffId'] ?? '',
       name: map['name'] ?? '',
+      department: map['department'] ?? '',
       bankAccountNumber: map['bankAccountNumber'] ?? '',
 
       dateOfJoining:
@@ -108,6 +112,7 @@ class StaffModel {
     String? id,
     String? staffId,
     String? name,
+    String? department,
     String? bankAccountNumber,
     DateTime? dateOfJoining,
     int? experience,
@@ -125,6 +130,7 @@ class StaffModel {
       id: id ?? this.id,
       staffId: staffId ?? this.staffId,
       name: name ?? this.name,
+      department: department ?? this.department,
       bankAccountNumber:
       bankAccountNumber ??
           this.bankAccountNumber,

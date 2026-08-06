@@ -1392,6 +1392,8 @@ class _SalaryCalculatorScreenState
 
                                   staffName: selectedStaff!.name,
 
+                                  department: selectedStaff!.department,
+
                                   bankAccountNumber: selectedStaff!.bankAccountNumber,
 
                                   month: selectedMonth,

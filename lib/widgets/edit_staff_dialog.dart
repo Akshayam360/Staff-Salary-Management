@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/staff_model.dart';
 import '../services/staff_service.dart';
 import 'package:intl/intl.dart';
+import '../../../utils/department_list.dart';
 
 class EditStaffDialog extends StatefulWidget {
   final StaffModel staff;
@@ -28,6 +29,8 @@ class _EditStaffDialogState
 
   late TextEditingController
   nameController;
+
+  late String selectedDepartment;
 
   late TextEditingController
   bankController;
@@ -68,6 +71,10 @@ class _EditStaffDialogState
         TextEditingController(
           text: widget.staff.name,
         );
+
+    selectedDepartment = kDepartments.contains(widget.staff.department)
+        ? widget.staff.department
+        : kDepartments.first;
 
     bankController =
         TextEditingController(
@@ -193,6 +200,25 @@ class _EditStaffDialogState
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 20),
+
+              DropdownButtonFormField<String>(
+                value: selectedDepartment,
+                decoration: const InputDecoration(
+                  labelText: 'Department',
+                ),
+                items: kDepartments.map((dept) {
+                  return DropdownMenuItem(
+                    value: dept,
+                    child: Text(dept),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedDepartment = value!;
+                  });
+                },
               ),
 
               const SizedBox(
@@ -431,24 +457,33 @@ class _EditStaffDialogState
                     onPressed:
                         () async {
 
-                      final updatedStaff =
-                      widget.staff
-                          .copyWith(
-                        name:
-                        nameController
-                            .text
-                            .trim(),
+                          final updatedStaff =
+                          widget.staff
+                              .copyWith(
+                            staffId:
+                            staffIdController
+                                .text
+                                .trim()
+                                .toUpperCase(),
 
-                        bankAccountNumber:
-                        bankController
-                            .text
-                            .trim(),
+                            name:
+                            nameController
+                                .text
+                                .trim(),
 
-                        baseSalary:
-                        double.parse(
-                          salaryController
-                              .text,
-                        ),
+                            department: selectedDepartment,
+
+                            bankAccountNumber:
+                            bankController
+                                .text
+                                .trim(),
+
+                            baseSalary:
+                            double.parse(
+                              salaryController
+                                  .text,
+                            ),
+
 
                         clBalance:
                         double.parse(

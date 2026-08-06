@@ -4,6 +4,7 @@ class SalaryHistoryModel {
   final String id;
   final String staffId;
   final String staffName;
+  final String department;
   final String bankAccountNumber;
   final String month;
 
@@ -40,6 +41,7 @@ class SalaryHistoryModel {
     required this.id,
     required this.staffId,
     required this.staffName,
+    required this.department,
     required this.bankAccountNumber,
     required this.month,
     required this.workingDays,
@@ -73,6 +75,7 @@ class SalaryHistoryModel {
       id: documentId,
       staffId: map['staffId'] ?? '',
       staffName: map['staffName'] ?? '',
+      department: map['department'] ?? '',
       bankAccountNumber:
       map['bankAccountNumber'] ?? '',
       month: map['month'] ?? '',
@@ -111,6 +114,7 @@ class SalaryHistoryModel {
     return {
       'staffId': staffId,
       'staffName': staffName,
+      'department': department,
       'bankAccountNumber': bankAccountNumber,
       'month': month,
       'workingDays': workingDays,
@@ -143,6 +147,7 @@ class SalaryHistoryModel {
     String? id,
     String? staffId,
     String? staffName,
+    String? department,
     String? bankAccountNumber,
     String? month,
     int? workingDays,
@@ -170,6 +175,7 @@ class SalaryHistoryModel {
       id: id ?? this.id,
       staffId: staffId ?? this.staffId,
       staffName: staffName ?? this.staffName,
+      department: department ?? this.department,
       bankAccountNumber:
       bankAccountNumber ?? this.bankAccountNumber,
       month: month ?? this.month,
