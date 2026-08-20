@@ -1,11 +1,16 @@
 const List<String> kDepartments = [
   'Tamil',
   'English',
-  'Maths',
+  'Mathematics',
   'Physics',
   'Computer Science',
   'Commerce',
   'Management',
   'Lab Assistant',
   'Non-Teaching',
+  'Placement',
+  'librarian',
+  'IT-Hub',
+  'Data Center',
+  'Physical Director',
 ];
