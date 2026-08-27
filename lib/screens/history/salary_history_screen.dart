@@ -63,20 +63,12 @@ class _SalaryHistoryScreenState
 
   ];
 
-  final List<String> yearFilters = [
-
+  // Dynamic range (not hardcoded) so the filter keeps working in future
+  // years without needing a code change — same approach as the Labour
+  // Salary History screen.
+  late final List<String> yearFilters = [
     'All',
-
-    '2026',
-
-    '2027',
-
-    '2028',
-
-    '2029',
-
-    '2030',
-
+    ...List.generate(11, (i) => '${DateTime.now().year - 5 + i}'),
   ];
 
   final StaffService
@@ -375,9 +367,16 @@ class _SalaryHistoryScreenState
                                 const SizedBox(width: 12),
 
                                 ElevatedButton.icon(
-                                  onPressed: () {
+                                  onPressed: () async {
 
-                                    // Print Next Step
+                                    final pdf = await payrollPdfService.generateMonthlyPayrollPdf(
+                                      month: month,
+                                      records: records,
+                                    );
+
+                                    await Printing.layoutPdf(
+                                      onLayout: (_) async => pdf,
+                                    );
 
                                   },
                                   icon: const Icon(Icons.print),
@@ -391,190 +390,190 @@ class _SalaryHistoryScreenState
                             const SizedBox(height: 20),
 
                             Scrollbar(
-                            controller: _horizontalController,
-                            thumbVisibility: true,
-                            interactive: true,
-                            child: SingleChildScrollView(
-                            controller: _horizontalController,
-                            scrollDirection: Axis.horizontal,
-                            child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                            minWidth: 1600,
-                            ),
-                            child: DataTable(
-
-                                headingRowColor: WidgetStateProperty.all(
-                                  const Color(0xFF37474F),
-                                ),
-
-                                headingTextStyle: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-
-                                dataRowMinHeight: 55,
-
-                                dataRowMaxHeight: 55,
-
-                                columnSpacing: 5,
-                                columns: const [
-
-                                  DataColumn(
-                                    label: Text('Staff ID'),
+                              controller: _horizontalController,
+                              thumbVisibility: true,
+                              interactive: true,
+                              child: SingleChildScrollView(
+                                controller: _horizontalController,
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 1600,
                                   ),
+                                  child: DataTable(
 
-                                  DataColumn(
-                                    label: Text('Name'),
+                                    headingRowColor: WidgetStateProperty.all(
+                                      const Color(0xFF37474F),
+                                    ),
 
-                                  ),
+                                    headingTextStyle: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
 
-                                  DataColumn(
-                                    label: Text('Account No'),
-                                  ),
+                                    dataRowMinHeight: 55,
 
-                                  DataColumn(
-                                    label: Text('Gross'),
-                                  ),
+                                    dataRowMaxHeight: 55,
 
-                                  DataColumn(
-                                    label: Text('LOP'),
-                                  ),
+                                    columnSpacing: 5,
+                                    columns: const [
 
-                                  DataColumn(
-                                    label: Text('PF'),
-                                  ),
-
-                                  DataColumn(
-                                    label: Text('ESI'),
-                                  ),
-
-                                  DataColumn(
-                                    label: Text('RD'),
-                                  ),
-
-                                  DataColumn(
-                                    label: Text('LIC'),
-                                  ),
-
-                                  DataColumn(
-                                    label: Text('TDS'),
-                                  ),
-
-                                  DataColumn(
-                                    label: Text('LLP'),
-                                  ),
-
-                                  DataColumn(
-                                    label: Text('Deduction'),
-                                  ),
-
-                                  DataColumn(
-                                    label: Text('Final Salary'),
-                                  ),
-
-                                  DataColumn(
-                                    label: Text('Action'),
-                                  ),
-
-
-                                ],
-
-                                rows: records.map((salary) {
-
-                                  return DataRow(
-                                    cells: [
-
-                                      DataCell(Text(salary.staffId)),
-
-                                      DataCell(Text(salary.staffName)),
-
-                                      DataCell(
-                                        Text(salary.bankAccountNumber),
+                                      DataColumn(
+                                        label: Text('Staff ID'),
                                       ),
 
-                                      DataCell(Text('₹${salary.grossSalary.toStringAsFixed(0)}')),
-
-                                      DataCell(
-                                        Text(
-                                          '₹${(salary.lopAmount + salary.llpAmount).toStringAsFixed(0)}',
-                                        ),
-                                      ),
-
-                                      DataCell(
-                                        Text(
-                                          '₹${salary.pfAmount.toStringAsFixed(0)}',
-                                        ),
-                                      ),
-
-                                      DataCell(
-                                        Text(
-                                          '₹${salary.esiAmount.toStringAsFixed(2)}',
-                                        ),
-                                      ),
-
-                                      DataCell(
-                                        Text(
-                                          '₹${salary.rdAmount.toStringAsFixed(0)}',
-                                        ),
-                                      ),
-
-                                      DataCell(
-                                        Text(
-                                          '₹${salary.licAmount.toStringAsFixed(0)}',
-                                        ),
-                                      ),
-
-                                      DataCell(
-                                        Text(
-                                          '₹${salary.tdsAmount.toStringAsFixed(0)}',
-                                        ),
-                                      ),
-
-                                      DataCell(
-                                        Text(
-                                          '${salary.llpDays}',
-                                        ),
-                                      ),
-                                      DataCell(Text('₹${salary.totalDeduction.toStringAsFixed(0)}')),
-
-                                      DataCell(
-                                        Text(
-                                          '₹${salary.finalSalary.toStringAsFixed(0)}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.green,
-                                          ),
-                                        ),
-                                      ),
-
-                                      DataCell(
-
-                                        IconButton(
-
-                                          icon: const Icon(
-                                            Icons.delete,
-                                            color: Colors.red,
-                                          ),
-
-                                          onPressed: () {
-
-                                            showDeleteDialog(
-                                              salary,
-                                            );
-
-                                          },
-
-                                        ),
+                                      DataColumn(
+                                        label: Text('Name'),
 
                                       ),
+
+                                      DataColumn(
+                                        label: Text('Account No'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('Gross'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('LOP'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('PF'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('ESI'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('RD'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('LIC'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('TDS'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('LLP'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('Deduction'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('Final Salary'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('Action'),
+                                      ),
+
+
                                     ],
-                                  );
 
-                                }).toList(),
+                                    rows: records.map((salary) {
+
+                                      return DataRow(
+                                        cells: [
+
+                                          DataCell(Text(salary.staffId)),
+
+                                          DataCell(Text(salary.staffName)),
+
+                                          DataCell(
+                                            Text(salary.bankAccountNumber),
+                                          ),
+
+                                          DataCell(Text('₹${salary.grossSalary.toStringAsFixed(0)}')),
+
+                                          DataCell(
+                                            Text(
+                                              '₹${(salary.lopAmount + salary.llpAmount).toStringAsFixed(0)}',
+                                            ),
+                                          ),
+
+                                          DataCell(
+                                            Text(
+                                              '₹${salary.pfAmount.toStringAsFixed(0)}',
+                                            ),
+                                          ),
+
+                                          DataCell(
+                                            Text(
+                                              '₹${salary.esiAmount.toStringAsFixed(2)}',
+                                            ),
+                                          ),
+
+                                          DataCell(
+                                            Text(
+                                              '₹${salary.rdAmount.toStringAsFixed(0)}',
+                                            ),
+                                          ),
+
+                                          DataCell(
+                                            Text(
+                                              '₹${salary.licAmount.toStringAsFixed(0)}',
+                                            ),
+                                          ),
+
+                                          DataCell(
+                                            Text(
+                                              '₹${salary.tdsAmount.toStringAsFixed(0)}',
+                                            ),
+                                          ),
+
+                                          DataCell(
+                                            Text(
+                                              '${salary.llpDays}',
+                                            ),
+                                          ),
+                                          DataCell(Text('₹${salary.totalDeduction.toStringAsFixed(0)}')),
+
+                                          DataCell(
+                                            Text(
+                                              '₹${salary.finalSalary.toStringAsFixed(0)}',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green,
+                                              ),
+                                            ),
+                                          ),
+
+                                          DataCell(
+
+                                            IconButton(
+
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+
+                                              onPressed: () {
+
+                                                showDeleteDialog(
+                                                  salary,
+                                                );
+
+                                              },
+
+                                            ),
+
+                                          ),
+                                        ],
+                                      );
+
+                                    }).toList(),
+                                  ),
+                                ),
                               ),
-                            ),
-                            ),
                             ),
 
                           ],

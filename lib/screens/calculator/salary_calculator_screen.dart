@@ -501,11 +501,16 @@ class _SalaryCalculatorScreenState
 
   double presentDays = 30;
 
-  late String selectedMonth;
+  late String selectedMonthName;
 
+  late int selectedYear;
 
+  // Dynamic range (not hardcoded) so the picker keeps working in future
+  // years without needing a code change — same approach as the Labour
+  // Salary Calculator.
+  late List<int> years;
 
-  late List<String> months;
+  String get selectedMonth => '$selectedMonthName $selectedYear';
 
   @override
   void initState() {
@@ -513,8 +518,10 @@ class _SalaryCalculatorScreenState
 
     final currentDate = DateTime.now();
 
-    selectedMonth =
-    '${_monthName(currentDate.month)} ${currentDate.year}';
+    selectedMonthName = _monthName(currentDate.month);
+    selectedYear = currentDate.year;
+
+    years = List.generate(11, (i) => currentDate.year - 5 + i);
 
     workingDaysController.text =
         DateTime(
@@ -525,21 +532,6 @@ class _SalaryCalculatorScreenState
 
     presentDaysController.text =
         workingDaysController.text;
-
-    months = [];
-
-    for (int year = currentDate.year - 5;
-    year <= currentDate.year + 5;
-    year++) {
-
-      for (int month = 1; month <= 12; month++) {
-
-        months.add(
-          '${_monthName(month)} $year',
-        );
-      }
-    }
-
   }
   String _monthName(int month) {
     const names = [
@@ -559,6 +551,26 @@ class _SalaryCalculatorScreenState
 
     return names[month - 1];
   }
+
+  /// Recomputes Working Days (and resets Present Days to match) whenever
+  /// the Month or Year dropdown changes, so the two stay in sync — mirrors
+  /// the Labour Salary Calculator's Working Days field.
+  void _refreshWorkingDaysForSelectedMonth() {
+    const monthNames = [
+      'January', 'February', 'March', 'April',
+      'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December',
+    ];
+
+    final monthNumber = monthNames.indexOf(selectedMonthName) + 1;
+
+    totalWorkingDays = DateUtils.getDaysInMonth(selectedYear, monthNumber);
+    presentDays = totalWorkingDays.toDouble();
+
+    workingDaysController.text = totalWorkingDays.toString();
+    presentDaysController.text = presentDays.toString();
+  }
+
   void validateDays() {
 
     final workingDays =
@@ -610,1139 +622,1167 @@ class _SalaryCalculatorScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xFFF7F8FA),
-        body: Scrollbar(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: Scrollbar(
+        controller: horizontalController,
+        thumbVisibility: true,
+        interactive: true,
+        child: SingleChildScrollView(
           controller: horizontalController,
-          thumbVisibility: true,
-          interactive: true,
-          child: SingleChildScrollView(
-            controller: horizontalController,
-            scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: 1800,
-                  child: Padding(
-                    padding: const EdgeInsets.all(40),
-                    child: Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
-          children: [
-
-            const Text(
-              'Salary Calculator',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight:
-                FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            const Text(
-              'Calculate staff salary with CL, OD, LCL, LLP, PF, ESI and TDS deductions.',
-              style: TextStyle(
-                color: Colors.grey,
-              ),
-            ),
-
-        const SizedBox(height: 30),
-
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: 1600,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: 1800,
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Column(
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
                 children: [
 
-              Expanded(
-                flex: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(25),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    interactive: true,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-
-                  Row(
-                    children: [
-
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: selectedMonth,
-                          decoration: InputDecoration(
-                            labelText: 'Month',
-                            filled: true,
-                            fillColor: Colors.white,
-
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            enabledBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            focusedBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-                          ),
-                          items: months.map((month) {
-                            return DropdownMenuItem(
-                              value: month,
-                              child: Text(month),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedMonth = value!;
-
-                              final parts = selectedMonth.split(' ');
-                              final monthName = parts[0];
-                              final year = int.parse(parts[1]);
-
-                              const monthNames = [
-                                'January', 'February', 'March', 'April',
-                                'May', 'June', 'July', 'August',
-                                'September', 'October', 'November', 'December',
-                              ];
-
-                              final monthNumber = monthNames.indexOf(monthName) + 1;
-
-                              totalWorkingDays = DateUtils.getDaysInMonth(
-                                year,
-                                monthNumber,
-                              );
-
-                              presentDays = totalWorkingDays.toDouble();
-
-                              workingDaysController.text = totalWorkingDays.toString();
-                              presentDaysController.text = presentDays.toString();
-                            });
-                          },
-                        ),
-                      ),
-
-                      const SizedBox(width: 20),
-
-                      Expanded(
-                        child: TextField(
-                          controller: workingDaysController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Working Days',
-
-                            filled: true,
-                            fillColor: Colors.white,
-
-                            suffixIcon: Column(
-                              mainAxisAlignment:
-                              MainAxisAlignment.center,
-                              children: [
-
-                                InkWell(
-                                  onTap: () {
-
-                                    final value =
-                                        int.tryParse(
-                                          workingDaysController.text,
-                                        ) ??
-                                            0;
-
-                                    final maxDays =
-                                        DateTime(
-                                          DateTime.now().year,
-                                          DateTime.now().month + 1,
-                                          0,
-                                        ).day;
-
-                                    if (value < maxDays) {
-
-                                      workingDaysController.text =
-                                      '${value + 1}';
-
-                                      validateDays();
-                                    }
-                                  },
-                                  child: const Icon(
-                                    Icons.keyboard_arrow_up,
-                                    size: 18,
-                                  ),
-                                ),
-
-                                InkWell(
-                                  onTap: () {
-
-                                    final value =
-                                        int.tryParse(
-                                          workingDaysController.text,
-                                        ) ??
-                                            0;
-
-                                    if (value > 1) {
-
-                                      workingDaysController.text =
-                                      '${value - 1}';
-
-                                      validateDays();
-                                    }
-                                  },
-                                  child: const Icon(
-                                    Icons.keyboard_arrow_down,
-                                    size: 18,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            errorText:
-                            workingDaysError,
-                          ),
-                          onChanged: (value) {
-                            validateDays();
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-
-                      Expanded(
-                        child: TextField(
-                          controller:
-                          presentDaysController,
-                          keyboardType:
-                          TextInputType.number,
-                          decoration:
-                          InputDecoration(
-                            labelText:
-                            'Present Days',
-                            filled: true,
-                            fillColor: Colors.white,
-
-                            suffixIcon: Column(
-                              mainAxisAlignment:
-                              MainAxisAlignment.center,
-                              children: [
-
-                                InkWell(
-                                  onTap: () {
-
-                                    final value =
-                                        int.tryParse(
-                                          presentDaysController.text,
-                                        ) ??
-                                            0;
-
-                                    if (value <
-                                        totalWorkingDays) {
-
-                                      presentDaysController.text =
-                                      '${value + 1}';
-
-                                      validateDays();
-                                    }
-                                  },
-                                  child: const Icon(
-                                    Icons.keyboard_arrow_up,
-                                    size: 18,
-                                  ),
-                                ),
-
-                                InkWell(
-                                  onTap: () {
-
-                                    final value =
-                                        int.tryParse(
-                                          presentDaysController.text,
-                                        ) ??
-                                            0;
-
-                                    if (value > 0) {
-
-                                      presentDaysController.text =
-                                      '${value - 1}';
-
-                                      validateDays();
-                                    }
-                                  },
-                                  child: const Icon(
-                                    Icons.keyboard_arrow_down,
-                                    size: 18,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            border:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            errorText:
-                            presentDaysError,
-                          ),
-                          onChanged: (value) {
-                            validateDays();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Text(
-                    'Absent Days : ${totalWorkingDays - presentDays}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.red,
+                  const Text(
+                    'Salary Calculator',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight:
+                      FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 25),
 
-                  TextField(
-                    controller: staffIdController,
-                    decoration: InputDecoration(
-                      labelText: 'Staff ID',
-                      errorText: staffIdError,
-                      filled: true,
-                      fillColor: Colors.white,
-
-                      border: OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius.circular(12),
-                      ),
-
-                      enabledBorder:
-                      OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius.circular(12),
-                      ),
-
-                      focusedBorder:
-                      OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius.circular(12),
-                        borderSide:
-                        const BorderSide(
-                          color: Color(0xFF08152E),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      findStaff();
-                    },
-                  ),
                   const SizedBox(height: 10),
-                  if (staffIdController.text.isNotEmpty)
 
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: selectedStaff != null
-                            ? Colors.green.shade50
-                            : Colors.red.shade50,
-                        borderRadius:
-                        BorderRadius.circular(10),
-                      ),
-                      child: selectedStaff != null
-
-                          ? Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-
-                          Text(
-                            'Name : ${selectedStaff!.name}',
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight:
-                              FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 5),
-
-                          Text(
-                            'Base Salary : ₹${selectedStaff!.baseSalary.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight:
-                              FontWeight.w600,
-                            ),
-                          ),
-
-                          const SizedBox(height: 5),
-
-                          Text(
-                            'Available CL : ${selectedStaff!.clBalance}',
-                            style: const TextStyle(
-                              color: Colors.green,
-                            ),
-                          ),
-
-                          const SizedBox(height: 5),
-
-                          Text(
-                            'Available OD : ${selectedStaff!.odDays}',
-                            style: const TextStyle(
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
-                      )
-
-                          : const Text(
-                        '❌ Staff Not Found',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight:
-                          FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 25),
-
-                  Row(
-                    children: [
-
-                      Expanded(
-                        child: TextField(
-                          controller: clController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-
-                          enabled:
-                          selectedStaff != null &&
-                              selectedStaff!.clBalance > 0,
-
-                          onChanged: (value) {
-                            validateLeaveFields();
-                          },
-
-
-                          decoration: InputDecoration(
-
-                            labelText: 'CL',
-
-                            errorText: clError,
-
-                            filled: true,
-                            fillColor: Colors.white,
-
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            enabledBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            focusedBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                              borderSide:
-                              const BorderSide(
-                                color: Color(0xFF08152E),
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-
-                      const SizedBox(width: 15),
-
-                      Expanded(
-                        child: TextField(
-                          controller: odController,
-                          keyboardType: TextInputType.number,
-
-                          enabled:
-                          selectedStaff != null &&
-                              selectedStaff!.odDays > 0,
-
-                          decoration: InputDecoration(
-                            labelText: 'OD',
-
-                            errorText: odError,
-
-                            filled: true,
-                            fillColor: Colors.white,
-
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            enabledBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            focusedBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                              borderSide:
-                              const BorderSide(
-                                color: Color(0xFF08152E),
-                                width: 2,
-                              ),
-                            ),
-                          ),
-
-                          onChanged: (value) {
-                            validateLeaveFields();
-                          },
-                        ),
-                      ),
-
-                    ],
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Row(
-                    children: [
-
-                      Expanded(
-                        child: TextField(
-                          controller: lodController,
-                          keyboardType: TextInputType.number,
-                          onChanged: (_){
-                            validateLeaveFields();
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'LOD',
-                            errorText: lodError,
-                            filled: true,
-                            fillColor: Colors.white,
-
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            enabledBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            focusedBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                              borderSide:
-                              const BorderSide(
-                                color: Color(0xFF08152E),
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 15),
-
-                      Expanded(
-                        child: TextField(
-                          enabled: lclEnabled,
-                          controller: lclController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'LCL',
-                            filled: true,
-                            fillColor: Colors.white,
-
-                            helperText: lclEnabled
-                                ? '2 days grace applies'
-                                : 'LCL unavailable (CL Balance is 0)',
-
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            enabledBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                            ),
-
-                            focusedBorder:
-                            OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(12),
-                              borderSide:
-                              const BorderSide(
-                                color: Color(0xFF08152E),
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  TextField(
-                    enabled: llpEnabled,
-                    controller: llpController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'LLP',
-                      filled: true,
-                      fillColor: Colors.white,
-
-                      border: OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius.circular(12),
-                      ),
-
-                      enabledBorder:
-                      OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius.circular(12),
-                      ),
-
-                      focusedBorder:
-                      OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius.circular(12),
-                        borderSide:
-                        const BorderSide(
-                          color: Color(0xFF08152E),
-                          width: 2,
-                        ),
-                      ),
+                  const Text(
+                    'Calculate staff salary with CL, OD, LCL, LLP, PF, ESI and TDS deductions.',
+                    style: TextStyle(
+                      color: Colors.grey,
                     ),
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 30),
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-
-                        if (validateAllFields()) {
-
-                          calculateSalary();
-
-                        }
-
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF08152E),
-                      ),
-                      child: const Text(
-                        'Calculate Salary',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-
-
-
-                ],
-                      ),
-                    ),
-
-              ),
-            ),
-            ),
-              const SizedBox(width: 25),
-
-
-            // Salary Slip Card Start
-              Expanded(
-                flex: 5,
-                child: Container(
-                  padding: const EdgeInsets.all(25),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-
-                        Row(
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                        width: 1600,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
 
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-
-                                const Text(
-                                  'SALARY SLIP',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    letterSpacing: 2,
-                                    fontSize: 12,
-                                  ),
+                            Expanded(
+                              flex: 4,
+                              child: Container(
+                                padding: const EdgeInsets.all(25),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
 
-                                const SizedBox(height: 8),
+                                child: Scrollbar(
+                                  thumbVisibility: true,
+                                  interactive: true,
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
 
-                                Text(
-                                  selectedStaff?.name ?? '-',
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                        Row(
+                                          children: [
 
-                                Text(
-                                  selectedStaff?.staffId ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                  ),
-                                ),
+                                            Expanded(
+                                              flex: 3,
+                                              child: DropdownButtonFormField<String>(
+                                                value: selectedMonthName,
+                                                decoration: InputDecoration(
+                                                  labelText: 'Month',
+                                                  filled: true,
+                                                  fillColor: Colors.white,
 
-                                Text(
-                                  selectedMonth,
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                            const Spacer(),
+                                                  enabledBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                            ElevatedButton.icon(
-                              onPressed: result == null
-                                  ? null
-                                  : () async {
+                                                  focusedBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
+                                                ),
+                                                items: List.generate(12, (i) => _monthName(i + 1))
+                                                    .map((month) {
+                                                  return DropdownMenuItem(
+                                                    value: month,
+                                                    child: Text(month),
+                                                  );
+                                                }).toList(),
+                                                onChanged: (value) {
+                                                  if (value == null) return;
+                                                  setState(() {
+                                                    selectedMonthName = value;
+                                                    _refreshWorkingDaysForSelectedMonth();
+                                                  });
+                                                },
+                                              ),
+                                            ),
 
-                                if (selectedStaff == null) return;
+                                            const SizedBox(width: 20),
 
-                                final alreadyExists =
-                                await salaryHistoryService.salaryAlreadyGenerated(
+                                            Expanded(
+                                              flex: 2,
+                                              child: DropdownButtonFormField<int>(
+                                                value: selectedYear,
+                                                decoration: InputDecoration(
+                                                  labelText: 'Year',
+                                                  filled: true,
+                                                  fillColor: Colors.white,
 
-                                  staffId: selectedStaff!.staffId,
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                                  month: selectedMonth,
-                                );
+                                                  enabledBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                                if (alreadyExists) {
+                                                  focusedBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
+                                                ),
+                                                items: years.map((year) {
+                                                  return DropdownMenuItem(
+                                                    value: year,
+                                                    child: Text('$year'),
+                                                  );
+                                                }).toList(),
+                                                onChanged: (value) {
+                                                  if (value == null) return;
+                                                  setState(() {
+                                                    selectedYear = value;
+                                                    _refreshWorkingDaysForSelectedMonth();
+                                                  });
+                                                },
+                                              ),
+                                            ),
 
-                                  if (mounted) {
+                                            const SizedBox(width: 20),
 
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                                            Expanded(
+                                              flex: 3,
+                                              child: TextField(
+                                                controller: workingDaysController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: InputDecoration(
+                                                  labelText: 'Working Days',
 
-                                      const SnackBar(
+                                                  filled: true,
+                                                  fillColor: Colors.white,
 
-                                        content: Text(
-                                          'Salary already generated for this month.',
+                                                  suffixIcon: Column(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                    children: [
+
+                                                      InkWell(
+                                                        onTap: () {
+
+                                                          final value =
+                                                              int.tryParse(
+                                                                workingDaysController.text,
+                                                              ) ??
+                                                                  0;
+
+                                                          final maxDays =
+                                                              DateTime(
+                                                                DateTime.now().year,
+                                                                DateTime.now().month + 1,
+                                                                0,
+                                                              ).day;
+
+                                                          if (value < maxDays) {
+
+                                                            workingDaysController.text =
+                                                            '${value + 1}';
+
+                                                            validateDays();
+                                                          }
+                                                        },
+                                                        child: const Icon(
+                                                          Icons.keyboard_arrow_up,
+                                                          size: 18,
+                                                        ),
+                                                      ),
+
+                                                      InkWell(
+                                                        onTap: () {
+
+                                                          final value =
+                                                              int.tryParse(
+                                                                workingDaysController.text,
+                                                              ) ??
+                                                                  0;
+
+                                                          if (value > 1) {
+
+                                                            workingDaysController.text =
+                                                            '${value - 1}';
+
+                                                            validateDays();
+                                                          }
+                                                        },
+                                                        child: const Icon(
+                                                          Icons.keyboard_arrow_down,
+                                                          size: 18,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
+
+                                                  errorText:
+                                                  workingDaysError,
+                                                ),
+                                                onChanged: (value) {
+                                                  validateDays();
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(width: 20),
+
+                                            Expanded(
+                                              flex: 3,
+                                              child: TextField(
+                                                controller:
+                                                presentDaysController,
+                                                keyboardType:
+                                                TextInputType.number,
+                                                decoration:
+                                                InputDecoration(
+                                                  labelText:
+                                                  'Present Days',
+                                                  filled: true,
+                                                  fillColor: Colors.white,
+
+                                                  suffixIcon: Column(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                    children: [
+
+                                                      InkWell(
+                                                        onTap: () {
+
+                                                          final value =
+                                                              int.tryParse(
+                                                                presentDaysController.text,
+                                                              ) ??
+                                                                  0;
+
+                                                          if (value <
+                                                              totalWorkingDays) {
+
+                                                            presentDaysController.text =
+                                                            '${value + 1}';
+
+                                                            validateDays();
+                                                          }
+                                                        },
+                                                        child: const Icon(
+                                                          Icons.keyboard_arrow_up,
+                                                          size: 18,
+                                                        ),
+                                                      ),
+
+                                                      InkWell(
+                                                        onTap: () {
+
+                                                          final value =
+                                                              int.tryParse(
+                                                                presentDaysController.text,
+                                                              ) ??
+                                                                  0;
+
+                                                          if (value > 0) {
+
+                                                            presentDaysController.text =
+                                                            '${value - 1}';
+
+                                                            validateDays();
+                                                          }
+                                                        },
+                                                        child: const Icon(
+                                                          Icons.keyboard_arrow_down,
+                                                          size: 18,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+
+                                                  border:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
+
+                                                  errorText:
+                                                  presentDaysError,
+                                                ),
+                                                onChanged: (value) {
+                                                  validateDays();
+                                                },
+                                              ),
+                                            ),
+                                          ],
                                         ),
 
-                                        backgroundColor: Colors.orange,
-                                      ),
-                                    );
-                                  }
+                                        const SizedBox(height: 20),
 
-                                  return;
-                                }
+                                        Text(
+                                          'Absent Days : ${totalWorkingDays - presentDays}',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 25),
 
-                                final history = SalaryHistoryModel(
+                                        TextField(
+                                          controller: staffIdController,
+                                          decoration: InputDecoration(
+                                            labelText: 'Staff ID',
+                                            errorText: staffIdError,
+                                            filled: true,
+                                            fillColor: Colors.white,
 
-                                  id: '',
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                            ),
 
-                                  staffId: selectedStaff!.staffId,
+                                            enabledBorder:
+                                            OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                            ),
 
-                                  staffName: selectedStaff!.name,
+                                            focusedBorder:
+                                            OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                              borderSide:
+                                              const BorderSide(
+                                                color: Color(0xFF08152E),
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          onChanged: (value) {
+                                            findStaff();
+                                          },
+                                        ),
+                                        const SizedBox(height: 10),
+                                        if (staffIdController.text.isNotEmpty)
 
-                                  department: selectedStaff!.department,
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: selectedStaff != null
+                                                  ? Colors.green.shade50
+                                                  : Colors.red.shade50,
+                                              borderRadius:
+                                              BorderRadius.circular(10),
+                                            ),
+                                            child: selectedStaff != null
 
-                                  bankAccountNumber: selectedStaff!.bankAccountNumber,
+                                                ? Column(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
 
-                                  month: selectedMonth,
+                                                Text(
+                                                  'Name : ${selectedStaff!.name}',
+                                                  style: const TextStyle(
+                                                    color: Colors.green,
+                                                    fontWeight:
+                                                    FontWeight.bold,
+                                                  ),
+                                                ),
 
-                                  workingDays: totalWorkingDays,
+                                                const SizedBox(height: 5),
 
-                                  presentDays: presentDays,
+                                                Text(
+                                                  'Base Salary : ₹${selectedStaff!.baseSalary.toStringAsFixed(0)}',
+                                                  style: const TextStyle(
+                                                    color: Colors.green,
+                                                    fontWeight:
+                                                    FontWeight.w600,
+                                                  ),
+                                                ),
 
-                                  absentDays:
-                                  (totalWorkingDays - presentDays),
+                                                const SizedBox(height: 5),
 
-                                  clUsed: double.parse(clController.text),
+                                                Text(
+                                                  'Available CL : ${selectedStaff!.clBalance}',
+                                                  style: const TextStyle(
+                                                    color: Colors.green,
+                                                  ),
+                                                ),
 
-                                  odUsed: double.parse(odController.text),
+                                                const SizedBox(height: 5),
 
-                                  lodDays: double.parse(lodController.text),
+                                                Text(
+                                                  'Available OD : ${selectedStaff!.odDays}',
+                                                  style: const TextStyle(
+                                                    color: Colors.green,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
 
-                                  lclDays: double.parse(lclController.text),
+                                                : const Text(
+                                              '❌ Staff Not Found',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontWeight:
+                                                FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        const SizedBox(height: 25),
 
-                                  llpDays: double.parse(llpController.text),
+                                        Row(
+                                          children: [
 
-                                  grossSalary: result!['grossSalary'],
+                                            Expanded(
+                                              child: TextField(
+                                                controller: clController,
+                                                keyboardType: const TextInputType.numberWithOptions(
+                                                  decimal: true,
+                                                ),
 
-                                  perDaySalary: result!['salaryPerDay'],
+                                                enabled:
+                                                selectedStaff != null &&
+                                                    selectedStaff!.clBalance > 0,
 
-                                  lopAmount: result!['absentDeduction'],
+                                                onChanged: (value) {
+                                                  validateLeaveFields();
+                                                },
 
-                                  llpAmount: result!['llpDeduction'],
 
-                                  pfAmount: result!['pf'],
+                                                decoration: InputDecoration(
 
-                                  esiAmount: result!['esi'],
+                                                  labelText: 'CL',
 
-                                  rdAmount: result!['rd'],
+                                                  errorText: clError,
 
-                                  licAmount: result!['lic'],
+                                                  filled: true,
+                                                  fillColor: Colors.white,
 
-                                  tdsAmount: result!['tds'],
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                                  totalDeduction: result!['totalDeduction'],
+                                                  enabledBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                                  finalSalary: result!['finalSalary'],
+                                                  focusedBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                    borderSide:
+                                                    const BorderSide(
+                                                      color: Color(0xFF08152E),
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
 
-                                  createdAt: DateTime.now(),
-                                );
 
-                                await salaryHistoryService.saveSalaryHistory(
-                                  history,
-                                );
+                                            const SizedBox(width: 15),
 
-                                debugPrint('Current CL : ${selectedStaff!.clBalance}');
-                                debugPrint('CL Used : ${double.parse(clController.text)}');
-                                debugPrint('LCL Deduction : $lclClDeduction');
-                                debugPrint('Current OD : ${selectedStaff!.odDays}');
-                                debugPrint('OD Used : ${double.parse(odController.text)}');
+                                            Expanded(
+                                              child: TextField(
+                                                controller: odController,
+                                                keyboardType: TextInputType.number,
 
-                                debugPrint(
-                                  'New CL : ${selectedStaff!.clBalance - double.parse(clController.text) - lclClDeduction}',
-                                );
+                                                enabled:
+                                                selectedStaff != null &&
+                                                    selectedStaff!.odDays > 0,
 
-                                debugPrint(
-                                  'New OD : ${selectedStaff!.odDays - double.parse(odController.text)}',
-                                );
+                                                decoration: InputDecoration(
+                                                  labelText: 'OD',
 
-                                await staffService.updateLeaveBalance(
+                                                  errorText: odError,
 
-                                  documentId: selectedStaff!.id,
+                                                  filled: true,
+                                                  fillColor: Colors.white,
 
-                                  clBalance:
-                                  selectedStaff!.clBalance -
-                                      double.parse(clController.text) -
-                                      lclClDeduction,
-                                  odDays:
-                                  selectedStaff!.odDays -
-                                      double.parse(odController.text),
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                                );
+                                                  enabledBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                                setState(() {
+                                                  focusedBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                    borderSide:
+                                                    const BorderSide(
+                                                      color: Color(0xFF08152E),
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                ),
 
-                                  selectedStaff = selectedStaff!.copyWith(
+                                                onChanged: (value) {
+                                                  validateLeaveFields();
+                                                },
+                                              ),
+                                            ),
 
-                                    clBalance:
-                                    selectedStaff!.clBalance -
-                                        double.parse(clController.text),
+                                          ],
+                                        ),
 
-                                    odDays:
-                                    selectedStaff!.odDays -
-                                        double.parse(odController.text),
-                                  );
+                                        const SizedBox(height: 15),
 
-                                });
+                                        Row(
+                                          children: [
 
-                                if (mounted) {
+                                            Expanded(
+                                              child: TextField(
+                                                controller: lodController,
+                                                keyboardType: TextInputType.number,
+                                                onChanged: (_){
+                                                  validateLeaveFields();
+                                                },
+                                                decoration: InputDecoration(
+                                                  labelText: 'LOD',
+                                                  errorText: lodError,
+                                                  filled: true,
+                                                  fillColor: Colors.white,
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                                    const SnackBar(
+                                                  enabledBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
 
-                                      content: Text(
-                                        'Salary History Saved Successfully',
-                                      ),
+                                                  focusedBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                    borderSide:
+                                                    const BorderSide(
+                                                      color: Color(0xFF08152E),
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
 
-                                      backgroundColor: Colors.green,
+                                            const SizedBox(width: 15),
+
+                                            Expanded(
+                                              child: TextField(
+                                                enabled: lclEnabled,
+                                                controller: lclController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: InputDecoration(
+                                                  labelText: 'LCL',
+                                                  filled: true,
+                                                  fillColor: Colors.white,
+
+                                                  helperText: lclEnabled
+                                                      ? '2 days grace applies'
+                                                      : 'LCL unavailable (CL Balance is 0)',
+
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
+
+                                                  enabledBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                  ),
+
+                                                  focusedBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
+                                                    borderSide:
+                                                    const BorderSide(
+                                                      color: Color(0xFF08152E),
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        const SizedBox(height: 15),
+
+                                        TextField(
+                                          enabled: llpEnabled,
+                                          controller: llpController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: InputDecoration(
+                                            labelText: 'LLP',
+                                            filled: true,
+                                            fillColor: Colors.white,
+
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                            ),
+
+                                            enabledBorder:
+                                            OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                            ),
+
+                                            focusedBorder:
+                                            OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                              borderSide:
+                                              const BorderSide(
+                                                color: Color(0xFF08152E),
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 25),
+
+                                        SizedBox(
+                                          width: double.infinity,
+                                          height: 50,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+
+                                              if (validateAllFields()) {
+
+                                                calculateSalary();
+
+                                              }
+
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: const Color(0xFF08152E),
+                                            ),
+                                            child: const Text(
+                                              'Calculate Salary',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
+
+
+                                      ],
                                     ),
-                                  );
+                                  ),
 
-                                  staffIdController.clear();
-
-                                  clController.text = '0';
-
-                                  odController.text = '0';
-
-                                  lodController.text = '0';
-
-                                  lclController.text = '0';
-
-                                  llpController.text = '0';
-
-                                  workingDaysController.text = '';
-
-                                  presentDaysController.text = '';
-
-                                  setState(() {
-
-                                    result = null;
-
-                                    selectedStaff = null;
-
-                                    totalWorkingDays = DateUtils.getDaysInMonth(
-                                      DateTime.now().year,
-                                      DateTime.now().month,
-                                    );
-
-
-                                    presentDays = totalWorkingDays.toDouble();
-
-                                    workingDaysController.text =
-                                        totalWorkingDays.toString();
-
-                                    presentDaysController.text =
-                                        presentDays.toString();
-
-                                  });
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                              ),
-
-                              icon: const Icon(Icons.save),
-
-                              label: const Text(
-                                'Save History',
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 25),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-
-                          summaryCard(
-                            'Working',
-                            '${result?['workingDays'] ?? '-'}',
-
-                          ),
-
-                          summaryCard(
-                            'Present',
-                            '${result?['presentDays'] ?? '-'}',
-
-                          ),
-
-                          summaryCard(
-                            'Absent',
-                            '${result?['absentDays'] ?? '-'}',
-
-                          ),
-
-                          summaryCard(
-                            'CL Used',
-                            '${result?['clUsed'] ?? '-'}',
-
-                          ),
-
-                          summaryCard(
-                            'CL Left',
-                            selectedStaff == null
-                                ? '-'
-                                : (selectedStaff!.clBalance -
-                                (result?['clUsed'] ?? 0))
-                                .toString(),
-                          ),
-
-
-                          summaryCard(
-                            'OD Used',
-                            '${result?['odUsed'] ?? '-'}',
-
-                          ),
-
-                          summaryCard(
-                            'OD Left',
-                            selectedStaff == null
-                                ? '-'
-                                : (selectedStaff!.odDays -
-                                (result?['odUsed'] ?? 0))
-                                .toString(),
-                          ),
-
-                          summaryCard(
-                            'LOD',
-                            '${result?['lod'] ?? '-'}',
-
-                          ),
-
-                          summaryCard(
-                            'LCL',
-                            '${result?['lcl'] ?? '-'}',
-
-                          ),
-
-                          summaryCard(
-                            'LLP',
-                            '${result?['llp'] ?? '-'}',
-
-                          ),
-
-
-                        ],
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey.shade300,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          children: [
-
-                            salaryRow(
-                              'Gross Salary',
-                              result?['grossSalary'],
-                            ),
-
-                            salaryRow(
-                              'LOP Deduction',
-                              result?['lopDeduction'],
-                            ),
-
-                            salaryRow(
-                              'PF',
-                              result?['pf'],
-                            ),
-
-                            salaryRow(
-                              'ESI (0.75%)',
-                              result?['esi'],
-                            ),
-
-                            salaryRow(
-                              'RD',
-                              result?['rd'],
-                            ),
-
-                            salaryRow(
-                              'LIC',
-                              result?['lic'],
-                            ),
-
-                            salaryRow(
-                              'TDS',
-                              result?['tds'],
-                            ),
-
-                            salaryRow(
-                              'Total Deductions',
-                              result?['totalDeduction'],
-                              isBold: true,
-                            ),
-
-                            Container(
-                              width: double.infinity,
-                              constraints: const BoxConstraints(
-                                minHeight: 55,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 20,
-                              ),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF08152E),
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(12),
-                                  bottomRight: Radius.circular(12),
                                 ),
                               ),
-                              child: Row(
-                                children: [
+                            ),
+                            const SizedBox(width: 25),
 
-                                  const Text(
-                                    'FINAL SALARY',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+
+                            // Salary Slip Card Start
+                            Expanded(
+                              flex: 5,
+                              child: Container(
+                                padding: const EdgeInsets.all(25),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+
+                                      Row(
+                                        children: [
+
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+
+                                              const Text(
+                                                'SALARY SLIP',
+                                                style: TextStyle(
+                                                  color: Colors.grey,
+                                                  letterSpacing: 2,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+
+                                              const SizedBox(height: 8),
+
+                                              Text(
+                                                selectedStaff?.name ?? '-',
+                                                style: const TextStyle(
+                                                  fontSize: 28,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+
+                                              Text(
+                                                selectedStaff?.staffId ?? '',
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+
+                                              Text(
+                                                selectedMonth,
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                          const Spacer(),
+
+                                          ElevatedButton.icon(
+                                            onPressed: result == null
+                                                ? null
+                                                : () async {
+
+                                              if (selectedStaff == null) return;
+
+                                              final alreadyExists =
+                                              await salaryHistoryService.salaryAlreadyGenerated(
+
+                                                staffId: selectedStaff!.staffId,
+
+                                                month: selectedMonth,
+                                              );
+
+                                              if (alreadyExists) {
+
+                                                if (mounted) {
+
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+
+                                                    const SnackBar(
+
+                                                      content: Text(
+                                                        'Salary already generated for this month.',
+                                                      ),
+
+                                                      backgroundColor: Colors.orange,
+                                                    ),
+                                                  );
+                                                }
+
+                                                return;
+                                              }
+
+                                              final history = SalaryHistoryModel(
+
+                                                id: '',
+
+                                                staffId: selectedStaff!.staffId,
+
+                                                staffName: selectedStaff!.name,
+
+                                                department: selectedStaff!.department,
+
+                                                bankAccountNumber: selectedStaff!.bankAccountNumber,
+
+                                                month: selectedMonth,
+
+                                                workingDays: totalWorkingDays,
+
+                                                presentDays: presentDays,
+
+                                                absentDays:
+                                                (totalWorkingDays - presentDays),
+
+                                                clUsed: double.parse(clController.text),
+
+                                                odUsed: double.parse(odController.text),
+
+                                                lodDays: double.parse(lodController.text),
+
+                                                lclDays: double.parse(lclController.text),
+
+                                                llpDays: double.parse(llpController.text),
+
+                                                grossSalary: result!['grossSalary'],
+
+                                                perDaySalary: result!['salaryPerDay'],
+
+                                                lopAmount: result!['absentDeduction'],
+
+                                                llpAmount: result!['llpDeduction'],
+
+                                                pfAmount: result!['pf'],
+
+                                                esiAmount: result!['esi'],
+
+                                                rdAmount: result!['rd'],
+
+                                                licAmount: result!['lic'],
+
+                                                tdsAmount: result!['tds'],
+
+                                                totalDeduction: result!['totalDeduction'],
+
+                                                finalSalary: result!['finalSalary'],
+
+                                                createdAt: DateTime.now(),
+                                              );
+
+                                              await salaryHistoryService.saveSalaryHistory(
+                                                history,
+                                              );
+
+                                              debugPrint('Current CL : ${selectedStaff!.clBalance}');
+                                              debugPrint('CL Used : ${double.parse(clController.text)}');
+                                              debugPrint('LCL Deduction : $lclClDeduction');
+                                              debugPrint('Current OD : ${selectedStaff!.odDays}');
+                                              debugPrint('OD Used : ${double.parse(odController.text)}');
+
+                                              debugPrint(
+                                                'New CL : ${selectedStaff!.clBalance - double.parse(clController.text) - lclClDeduction}',
+                                              );
+
+                                              debugPrint(
+                                                'New OD : ${selectedStaff!.odDays - double.parse(odController.text)}',
+                                              );
+
+                                              await staffService.updateLeaveBalance(
+
+                                                documentId: selectedStaff!.id,
+
+                                                clBalance:
+                                                selectedStaff!.clBalance -
+                                                    double.parse(clController.text) -
+                                                    lclClDeduction,
+                                                odDays:
+                                                selectedStaff!.odDays -
+                                                    double.parse(odController.text),
+
+                                              );
+
+                                              setState(() {
+
+                                                selectedStaff = selectedStaff!.copyWith(
+
+                                                  clBalance:
+                                                  selectedStaff!.clBalance -
+                                                      double.parse(clController.text),
+
+                                                  odDays:
+                                                  selectedStaff!.odDays -
+                                                      double.parse(odController.text),
+                                                );
+
+                                              });
+
+                                              if (mounted) {
+
+                                                ScaffoldMessenger.of(context).showSnackBar(
+
+                                                  const SnackBar(
+
+                                                    content: Text(
+                                                      'Salary History Saved Successfully',
+                                                    ),
+
+                                                    backgroundColor: Colors.green,
+                                                  ),
+                                                );
+
+                                                staffIdController.clear();
+
+                                                clController.text = '0';
+
+                                                odController.text = '0';
+
+                                                lodController.text = '0';
+
+                                                lclController.text = '0';
+
+                                                llpController.text = '0';
+
+                                                workingDaysController.text = '';
+
+                                                presentDaysController.text = '';
+
+                                                setState(() {
+
+                                                  result = null;
+
+                                                  selectedStaff = null;
+
+                                                  totalWorkingDays = DateUtils.getDaysInMonth(
+                                                    DateTime.now().year,
+                                                    DateTime.now().month,
+                                                  );
+
+
+                                                  presentDays = totalWorkingDays.toDouble();
+
+                                                  workingDaysController.text =
+                                                      totalWorkingDays.toString();
+
+                                                  presentDaysController.text =
+                                                      presentDays.toString();
+
+                                                });
+                                              }
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green,
+                                              foregroundColor: Colors.white,
+                                            ),
+
+                                            icon: const Icon(Icons.save),
+
+                                            label: const Text(
+                                              'Save History',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 25),
+                                      Wrap(
+                                        spacing: 12,
+                                        runSpacing: 12,
+                                        children: [
+
+                                          summaryCard(
+                                            'Working',
+                                            '${result?['workingDays'] ?? '-'}',
+
+                                          ),
+
+                                          summaryCard(
+                                            'Present',
+                                            '${result?['presentDays'] ?? '-'}',
+
+                                          ),
+
+                                          summaryCard(
+                                            'Absent',
+                                            '${result?['absentDays'] ?? '-'}',
+
+                                          ),
+
+                                          summaryCard(
+                                            'CL Used',
+                                            '${result?['clUsed'] ?? '-'}',
+
+                                          ),
+
+                                          summaryCard(
+                                            'CL Left',
+                                            selectedStaff == null
+                                                ? '-'
+                                                : (selectedStaff!.clBalance -
+                                                (result?['clUsed'] ?? 0))
+                                                .toString(),
+                                          ),
+
+
+                                          summaryCard(
+                                            'OD Used',
+                                            '${result?['odUsed'] ?? '-'}',
+
+                                          ),
+
+                                          summaryCard(
+                                            'OD Left',
+                                            selectedStaff == null
+                                                ? '-'
+                                                : (selectedStaff!.odDays -
+                                                (result?['odUsed'] ?? 0))
+                                                .toString(),
+                                          ),
+
+                                          summaryCard(
+                                            'LOD',
+                                            '${result?['lod'] ?? '-'}',
+
+                                          ),
+
+                                          summaryCard(
+                                            'LCL',
+                                            '${result?['lcl'] ?? '-'}',
+
+                                          ),
+
+                                          summaryCard(
+                                            'LLP',
+                                            '${result?['llp'] ?? '-'}',
+
+                                          ),
+
+
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 25),
+
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                          ),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Column(
+                                          children: [
+
+                                            salaryRow(
+                                              'Gross Salary',
+                                              result?['grossSalary'],
+                                            ),
+
+                                            salaryRow(
+                                              'LOP Deduction',
+                                              result?['lopDeduction'],
+                                            ),
+
+                                            salaryRow(
+                                              'PF',
+                                              result?['pf'],
+                                            ),
+
+                                            salaryRow(
+                                              'ESI (0.75%)',
+                                              result?['esi'],
+                                            ),
+
+                                            salaryRow(
+                                              'RD',
+                                              result?['rd'],
+                                            ),
+
+                                            salaryRow(
+                                              'LIC',
+                                              result?['lic'],
+                                            ),
+
+                                            salaryRow(
+                                              'TDS',
+                                              result?['tds'],
+                                            ),
+
+                                            salaryRow(
+                                              'Total Deductions',
+                                              result?['totalDeduction'],
+                                              isBold: true,
+                                            ),
+
+                                            Container(
+                                              width: double.infinity,
+                                              constraints: const BoxConstraints(
+                                                minHeight: 55,
+                                              ),
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 18,
+                                                vertical: 20,
+                                              ),
+                                              decoration: const BoxDecoration(
+                                                color: Color(0xFF08152E),
+                                                borderRadius: BorderRadius.only(
+                                                  bottomLeft: Radius.circular(12),
+                                                  bottomRight: Radius.circular(12),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+
+                                                  const Text(
+                                                    'FINAL SALARY',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+
+                                                  const Spacer(),
+
+                                                  Text(
+                                                    '₹${(result?['finalSalary'] ?? 0).toStringAsFixed(2)}',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 28,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
 
-                                  const Spacer(),
-
-                                  Text(
-                                    '₹${(result?['finalSalary'] ?? 0).toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      ],
-                    ),
 
-                ),
-              ),
-              ),
-          ],
-              ),
-            ),
-
-        ),
-      ),
-          ],
                     ),
                   ),
-                ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
