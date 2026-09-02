@@ -226,6 +226,22 @@ class _SalaryHistoryScreenState
                   ),
                 ),
 
+                const SizedBox(width: 20),
+
+                OutlinedButton.icon(
+                  onPressed: _showClearHistoryDialog,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red.shade700,
+                    side: BorderSide(color: Colors.red.shade200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 18,
+                    ),
+                  ),
+                  icon: const Icon(Icons.delete_sweep_outlined),
+                  label: const Text('Clear History'),
+                ),
+
               ],
             ),
 
@@ -669,67 +685,73 @@ class _SalaryHistoryScreenState
     );
 
   }
+  /// Deletes one salary_history record and restores that staff member's
+  /// CL/OD balance. Used by both the single-record delete and the
+  /// bulk Clear History flow, so restoration always stays in sync.
+  Future<void> _deleteSingleRecord(SalaryHistoryModel salary) async {
+
+    final staffSnapshot =
+    await FirebaseFirestore.instance
+        .collection('staff')
+        .where(
+      'staffId',
+      isEqualTo: salary.staffId,
+    )
+        .limit(1)
+        .get();
+
+    if (staffSnapshot.docs.isNotEmpty) {
+
+      double lclRestore = 0;
+
+      if (salary.lclDays >= 5 && salary.lclDays <= 7) {
+        lclRestore = 0.5;
+      } else if (salary.lclDays >= 8 && salary.lclDays <= 10) {
+        lclRestore = 1.0;
+      } else if (salary.lclDays >= 11 && salary.lclDays <= 13) {
+        lclRestore = 1.5;
+      } else if (salary.lclDays >= 14 && salary.lclDays <= 16) {
+        lclRestore = 2.0;
+      } else if (salary.lclDays >= 17 && salary.lclDays <= 19) {
+        lclRestore = 2.5;
+      }else if (salary.lclDays >= 20 && salary.lclDays <= 22) {
+        lclRestore = 3.0;
+      } else if (salary.lclDays >= 23 && salary.lclDays <= 25) {
+        lclRestore = 3.5;
+      } else if (salary.lclDays >= 26 && salary.lclDays <= 28) {
+        lclRestore = 4.0;
+      } else if (salary.lclDays >= 29 && salary.lclDays <= 31) {
+        lclRestore = 4.5;
+      }
+
+      double totalClRestore =
+          salary.clUsed + lclRestore;
+
+      await StaffService().restoreLeaveBalance(
+
+        documentId: staffSnapshot.docs.first.id,
+
+        clToRestore: totalClRestore,
+
+        odToRestore: salary.odUsed,
+
+      );
+
+    }
+
+    await salaryHistoryService
+        .deleteSalaryHistory(
+      salary.id,
+    );
+  }
+
   Future<void> deleteSalaryRecord(
       SalaryHistoryModel salary,
       ) async {
 
     try {
 
-
-
-      final staffSnapshot =
-      await FirebaseFirestore.instance
-          .collection('staff')
-          .where(
-        'staffId',
-        isEqualTo: salary.staffId,
-      )
-          .limit(1)
-          .get();
-
-      if (staffSnapshot.docs.isNotEmpty) {
-
-        double lclRestore = 0;
-
-        if (salary.lclDays >= 5 && salary.lclDays <= 7) {
-          lclRestore = 0.5;
-        } else if (salary.lclDays >= 8 && salary.lclDays <= 10) {
-          lclRestore = 1.0;
-        } else if (salary.lclDays >= 11 && salary.lclDays <= 13) {
-          lclRestore = 1.5;
-        } else if (salary.lclDays >= 14 && salary.lclDays <= 16) {
-          lclRestore = 2.0;
-        } else if (salary.lclDays >= 17 && salary.lclDays <= 19) {
-          lclRestore = 2.5;
-        }else if (salary.lclDays >= 20 && salary.lclDays <= 22) {
-          lclRestore = 3.0;
-        } else if (salary.lclDays >= 23 && salary.lclDays <= 25) {
-          lclRestore = 3.5;
-        } else if (salary.lclDays >= 26 && salary.lclDays <= 28) {
-          lclRestore = 4.0;
-        } else if (salary.lclDays >= 29 && salary.lclDays <= 31) {
-          lclRestore = 4.5;
-        }
-
-        double totalClRestore =
-            salary.clUsed + lclRestore;
-
-        await StaffService().restoreLeaveBalance(
-
-          documentId: staffSnapshot.docs.first.id,
-
-          clToRestore: totalClRestore,
-
-          odToRestore: salary.odUsed,
-
-        );
-
-      }
-
-      await salaryHistoryService
-          .deleteSalaryHistory(
-        salary.id,
-      );
+      await _deleteSingleRecord(salary);
 
       if (mounted) {
 
@@ -770,4 +792,211 @@ class _SalaryHistoryScreenState
       }
     }
   }
+
+  // -------------------------------------------------------------------
+  // CLEAR HISTORY — pick a scope (all / a whole year / one month), then
+  // confirm before the bulk delete runs. Each matching record is removed
+  // through _deleteSingleRecord so CL/OD balances get restored too,
+  // same as a single delete.
+  // -------------------------------------------------------------------
+  Future<void> _showClearHistoryDialog() async {
+    _ClearHistoryScope scope = _ClearHistoryScope.all;
+    int selectedYear = DateTime.now().year;
+    int selectedMonth = DateTime.now().month;
+    final years = List.generate(11, (i) => DateTime.now().year - 5 + i);
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Clear Salary History'),
+              content: SizedBox(
+                width: 380,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Choose what to permanently delete. This cannot be undone.',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                    const SizedBox(height: 12),
+                    RadioListTile<_ClearHistoryScope>(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: const Text('All history'),
+                      value: _ClearHistoryScope.all,
+                      groupValue: scope,
+                      onChanged: (v) => setDialogState(() => scope = v!),
+                    ),
+                    RadioListTile<_ClearHistoryScope>(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: const Text('One year (all months)'),
+                      value: _ClearHistoryScope.year,
+                      groupValue: scope,
+                      onChanged: (v) => setDialogState(() => scope = v!),
+                    ),
+                    if (scope == _ClearHistoryScope.year)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 32, bottom: 8),
+                        child: DropdownButton<int>(
+                          isExpanded: true,
+                          value: selectedYear,
+                          items: years
+                              .map((y) => DropdownMenuItem(
+                              value: y, child: Text('$y')))
+                              .toList(),
+                          onChanged: (v) =>
+                              setDialogState(() => selectedYear = v!),
+                        ),
+                      ),
+                    RadioListTile<_ClearHistoryScope>(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: const Text('One month'),
+                      value: _ClearHistoryScope.month,
+                      groupValue: scope,
+                      onChanged: (v) => setDialogState(() => scope = v!),
+                    ),
+                    if (scope == _ClearHistoryScope.month)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 32),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButton<int>(
+                                isExpanded: true,
+                                value: selectedMonth,
+                                items: List.generate(
+                                  12,
+                                      (i) => DropdownMenuItem(
+                                    value: i + 1,
+                                    // monthFilters[0] is 'All', so index
+                                    // i+1 lines up with month number i+1.
+                                    child: Text(monthFilters[i + 1]),
+                                  ),
+                                ),
+                                onChanged: (v) =>
+                                    setDialogState(() => selectedMonth = v!),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButton<int>(
+                                isExpanded: true,
+                                value: selectedYear,
+                                items: years
+                                    .map((y) => DropdownMenuItem(
+                                    value: y, child: Text('$y')))
+                                    .toList(),
+                                onChanged: (v) =>
+                                    setDialogState(() => selectedYear = v!),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    _confirmAndClearHistory(scope, selectedMonth, selectedYear);
+                  },
+                  child: const Text('Clear'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// A second, explicit confirmation naming exactly what will be deleted —
+  /// bulk deletes are hard to undo, so this is a deliberate extra step
+  /// beyond the single-record delete's one dialog.
+  Future<void> _confirmAndClearHistory(
+      _ClearHistoryScope scope, int month, int year) async {
+    final monthName = monthFilters[month]; // index i lines up with month i
+    final label = switch (scope) {
+      _ClearHistoryScope.all => 'ALL salary history records',
+      _ClearHistoryScope.year => 'all records for $year',
+      _ClearHistoryScope.month => 'all records for $monthName $year',
+    };
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: Text(
+          'This will permanently delete $label.\n\n'
+              'CL and OD balances for affected staff will also be restored.\n\n'
+              'This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      final allRecords =
+      await salaryHistoryService.getSalaryHistory().first;
+
+      final toDelete = allRecords.where((s) {
+        switch (scope) {
+          case _ClearHistoryScope.all:
+            return true;
+          case _ClearHistoryScope.year:
+            return s.month.contains('$year');
+          case _ClearHistoryScope.month:
+            return s.month.contains(monthName) && s.month.contains('$year');
+        }
+      }).toList();
+
+      for (final record in toDelete) {
+        await _deleteSingleRecord(record);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Cleared ${toDelete.length} record(s) — $label'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 }
+
+enum _ClearHistoryScope { all, year, month }

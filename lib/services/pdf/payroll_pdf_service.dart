@@ -105,6 +105,7 @@ class PayrollPdfService {
       'Staff ID',
       'Name',
       'Account No',
+      'LOP',
       'Gross Salary',
       'PF',
       'ESI',
@@ -114,13 +115,28 @@ class PayrollPdfService {
       'Net Salary',
     ];
 
+    // LOP Days = Absent days (after CL adjustment) + LLP days
+    // (e.g. 5 LLP entries -> 0.5 day LOP).
+    // Reconstructed from stored amounts: (lopAmount + llpAmount) / perDaySalary
+    String lopDaysFor(SalaryHistoryModel s) {
+      if (s.perDaySalary <= 0) return '0';
+
+      final totalLopDays =
+          (s.lopAmount + s.llpAmount) / s.perDaySalary;
+
+      return totalLopDays == totalLopDays.roundToDouble()
+          ? totalLopDays.toStringAsFixed(0)
+          : totalLopDays.toStringAsFixed(1);
+    }
+
     List<String> rowFor(SalaryHistoryModel s) => [
       s.staffId,
       s.staffName,
       s.bankAccountNumber,
+      lopDaysFor(s),
       s.grossSalary.toStringAsFixed(0),
       s.pfAmount.toStringAsFixed(0),
-      s.esiAmount.toStringAsFixed(2),
+      s.esiAmount.round().toString(),
       s.rdAmount.toStringAsFixed(0),
       s.licAmount.toStringAsFixed(0),
       s.tdsAmount.toStringAsFixed(0),
@@ -131,7 +147,7 @@ class PayrollPdfService {
 
       pw.MultiPage(
 
-        pageFormat: PdfPageFormat.a4,
+        pageFormat: PdfPageFormat.a4.landscape,
 
         margin: const pw.EdgeInsets.all(25),
 
@@ -314,7 +330,7 @@ class PayrollPdfService {
                 [
                   '₹${totalGross.toStringAsFixed(0)}',
                   '₹${totalPf.toStringAsFixed(0)}',
-                  '₹${totalEsi.toStringAsFixed(2)}',
+                  '₹${totalEsi.round()}',
                   '₹${totalRd.toStringAsFixed(0)}',
                   '₹${totalLic.toStringAsFixed(0)}',
                   '₹${totalTds.toStringAsFixed(0)}',

@@ -229,9 +229,18 @@ class _SalaryCalculatorScreenState
       final presentDays =
           int.tryParse(presentDaysController.text) ?? 0;
 
+      const monthNames = [
+        'January', 'February', 'March', 'April',
+        'May', 'June', 'July', 'August',
+        'September', 'October', 'November', 'December',
+      ];
+
+      final selectedMonthNumber =
+          monthNames.indexOf(selectedMonthName) + 1;
+
       final maxDays = DateUtils.getDaysInMonth(
-        DateTime.now().year,
-        DateTime.now().month,
+        selectedYear,
+        selectedMonthNumber,
       );
 
       if (workingDays <= 0 || workingDays > maxDays) {
@@ -585,12 +594,19 @@ class _SalaryCalculatorScreenState
         ) ??
             0;
 
-    final maxDays =
-        DateTime(
-          DateTime.now().year,
-          DateTime.now().month + 1,
-          0,
-        ).day;
+    const monthNames = [
+      'January', 'February', 'March', 'April',
+      'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December',
+    ];
+
+    final selectedMonthNumber =
+        monthNames.indexOf(selectedMonthName) + 1;
+
+    final maxDays = DateUtils.getDaysInMonth(
+      selectedYear,
+      selectedMonthNumber,
+    );
 
     setState(() {
 
@@ -802,12 +818,20 @@ class _SalaryCalculatorScreenState
                                                               ) ??
                                                                   0;
 
+                                                          const monthNames = [
+                                                            'January', 'February', 'March', 'April',
+                                                            'May', 'June', 'July', 'August',
+                                                            'September', 'October', 'November', 'December',
+                                                          ];
+
+                                                          final selectedMonthNumber =
+                                                              monthNames.indexOf(selectedMonthName) + 1;
+
                                                           final maxDays =
-                                                              DateTime(
-                                                                DateTime.now().year,
-                                                                DateTime.now().month + 1,
-                                                                0,
-                                                              ).day;
+                                                          DateUtils.getDaysInMonth(
+                                                            selectedYear,
+                                                            selectedMonthNumber,
+                                                          );
 
                                                           if (value < maxDays) {
 
@@ -1563,9 +1587,15 @@ class _SalaryCalculatorScreenState
 
                                                   selectedStaff = null;
 
+                                                  const monthNames = [
+                                                    'January', 'February', 'March', 'April',
+                                                    'May', 'June', 'July', 'August',
+                                                    'September', 'October', 'November', 'December',
+                                                  ];
+
                                                   totalWorkingDays = DateUtils.getDaysInMonth(
-                                                    DateTime.now().year,
-                                                    DateTime.now().month,
+                                                    selectedYear,
+                                                    monthNames.indexOf(selectedMonthName) + 1,
                                                   );
 
 
