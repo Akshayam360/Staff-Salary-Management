@@ -17,6 +17,7 @@ class SalaryHistoryModel {
   final double lodDays;
   final double lclDays;
   final double llpDays;
+  final double alDays;
 
   final double grossSalary;
   final double perDaySalary;
@@ -29,6 +30,7 @@ class SalaryHistoryModel {
   final double rdAmount;
   final double licAmount;
   final double tdsAmount;
+  final double busFee;
 
   final double totalDeduction;
   final double finalSalary;
@@ -52,6 +54,7 @@ class SalaryHistoryModel {
     required this.lodDays,
     required this.lclDays,
     required this.llpDays,
+    this.alDays = 0,
     required this.grossSalary,
     required this.perDaySalary,
     required this.lopAmount,
@@ -61,6 +64,7 @@ class SalaryHistoryModel {
     required this.rdAmount,
     required this.licAmount,
     required this.tdsAmount,
+    this.busFee = 0,
     required this.totalDeduction,
     required this.finalSalary,
     required this.createdAt,
@@ -90,6 +94,7 @@ class SalaryHistoryModel {
       lodDays: (map['lodDays'] ?? 0).toDouble(),
       lclDays: (map['lclDays'] ?? 0).toDouble(),
       llpDays: (map['llpDays'] ?? 0).toDouble(),
+      alDays: (map['alDays'] ?? 0).toDouble(),
       grossSalary: (map['grossSalary'] ?? 0).toDouble(),
       perDaySalary: (map['perDaySalary'] ?? 0).toDouble(),
       lopAmount: (map['lopAmount'] ?? 0).toDouble(),
@@ -100,6 +105,7 @@ class SalaryHistoryModel {
       licAmount:
       (map['licAmount'] ?? 0).toDouble(),
       tdsAmount: (map['tdsAmount'] ?? 0).toDouble(),
+      busFee: (map['busFee'] ?? 0).toDouble(),
       totalDeduction:
       (map['totalDeduction'] ?? 0).toDouble(),
       finalSalary:
@@ -125,6 +131,7 @@ class SalaryHistoryModel {
       'lodDays': lodDays,
       'lclDays': lclDays,
       'llpDays': llpDays,
+      'alDays': alDays,
       'grossSalary': grossSalary,
       'perDaySalary': perDaySalary,
       'lopAmount': lopAmount,
@@ -134,6 +141,7 @@ class SalaryHistoryModel {
       'rdAmount': rdAmount,
       'licAmount': licAmount,
       'tdsAmount': tdsAmount,
+      'busFee': busFee,
       'totalDeduction': totalDeduction,
       'finalSalary': finalSalary,
       'createdAt': Timestamp.fromDate(
@@ -158,6 +166,7 @@ class SalaryHistoryModel {
     double? lodDays,
     double? lclDays,
     double? llpDays,
+    double? alDays,
     double? grossSalary,
     double? perDaySalary,
     double? lopAmount,
@@ -167,6 +176,7 @@ class SalaryHistoryModel {
     double? rdAmount,
     double? licAmount,
     double? tdsAmount,
+    double? busFee,
     double? totalDeduction,
     double? finalSalary,
     DateTime? createdAt,
@@ -190,6 +200,7 @@ class SalaryHistoryModel {
       lodDays: lodDays ?? this.lodDays,
       lclDays: lclDays ?? this.lclDays,
       llpDays: llpDays ?? this.llpDays,
+      alDays: alDays ?? this.alDays,
       grossSalary:
       grossSalary ?? this.grossSalary,
       perDaySalary:
@@ -208,6 +219,7 @@ class SalaryHistoryModel {
       licAmount ?? this.licAmount,
       tdsAmount:
       tdsAmount ?? this.tdsAmount,
+      busFee: busFee ?? this.busFee,
       totalDeduction:
       totalDeduction ??
           this.totalDeduction,

@@ -366,13 +366,24 @@ class _SalaryCalculatorScreenState
     double tds =
         selectedStaff!.tdsAmount;
 
+    double busFee =
+        double.tryParse(
+          busFeeController.text,
+        ) ??
+            0;
+
+    if (busFee < 0) {
+      busFee = 0;
+    }
+
     double totalDeduction =
         lopDeduction +
             pf +
             esi +
             rd +
             lic +
-            tds;
+            tds +
+            busFee;
 
     double netSalary =
         grossSalary -
@@ -441,6 +452,14 @@ class _SalaryCalculatorScreenState
 
         'tds': tds,
 
+        'busFee': busFee,
+
+        'alDays':
+        double.tryParse(
+          alController.text,
+        ) ??
+            0,
+
         'totalDeduction': totalDeduction,
 
         'finalSalary': netSalary,
@@ -470,6 +489,16 @@ class _SalaryCalculatorScreenState
 
   final TextEditingController
   llpController =
+  TextEditingController(text: '0');
+
+  // AL (Allowed Leave) is informational only - never used in salary.
+  final TextEditingController
+  alController =
+  TextEditingController(text: '0');
+
+  // Bus fee is deducted from the net salary when entered.
+  final TextEditingController
+  busFeeController =
   TextEditingController(text: '0');
 
   final workingDaysController =
@@ -1315,6 +1344,34 @@ class _SalaryCalculatorScreenState
                                           ),
                                         ),
 
+                                        const SizedBox(height: 15),
+
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextField(
+                                                controller: alController,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                decoration: leaveInputDecoration(
+                                                  'AL (Allowed Leave)',
+                                                  'Info only, not deducted',
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 15),
+                                            Expanded(
+                                              child: TextField(
+                                                controller: busFeeController,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                decoration: leaveInputDecoration(
+                                                  'Bus Fee (₹)',
+                                                  'Deducted from salary',
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
                                         const SizedBox(height: 25),
 
                                         SizedBox(
@@ -1479,6 +1536,8 @@ class _SalaryCalculatorScreenState
 
                                                 llpDays: double.parse(llpController.text),
 
+                                                alDays: result!['alDays'],
+
                                                 grossSalary: result!['grossSalary'],
 
                                                 perDaySalary: result!['salaryPerDay'],
@@ -1496,6 +1555,8 @@ class _SalaryCalculatorScreenState
                                                 licAmount: result!['lic'],
 
                                                 tdsAmount: result!['tds'],
+
+                                                busFee: result!['busFee'],
 
                                                 totalDeduction: result!['totalDeduction'],
 
@@ -1576,6 +1637,10 @@ class _SalaryCalculatorScreenState
                                                 lclController.text = '0';
 
                                                 llpController.text = '0';
+
+                                                alController.text = '0';
+
+                                                busFeeController.text = '0';
 
                                                 workingDaysController.text = '';
 
@@ -1697,6 +1762,11 @@ class _SalaryCalculatorScreenState
 
                                           ),
 
+                                          summaryCard(
+                                            'AL',
+                                            '${result?['alDays'] ?? '-'}',
+                                          ),
+
 
                                         ],
                                       ),
@@ -1746,6 +1816,11 @@ class _SalaryCalculatorScreenState
                                             salaryRow(
                                               'TDS',
                                               result?['tds'],
+                                            ),
+
+                                            salaryRow(
+                                              'Bus Fee',
+                                              result?['busFee'],
                                             ),
 
                                             salaryRow(
@@ -1859,6 +1934,31 @@ class _SalaryCalculatorScreenState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  InputDecoration leaveInputDecoration(
+      String label,
+      String helper,
+      ) {
+    return InputDecoration(
+      labelText: label,
+      helperText: helper,
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xFF08152E),
+          width: 2,
+        ),
       ),
     );
   }

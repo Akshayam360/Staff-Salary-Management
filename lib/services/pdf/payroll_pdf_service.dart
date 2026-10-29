@@ -73,6 +73,11 @@ class PayrollPdfService {
           (sum, item) => sum + item.tdsAmount,
     );
 
+    final totalBusFee = records.fold<double>(
+      0,
+          (sum, item) => sum + item.busFee,
+    );
+
     final totalNetSalary = records.fold<double>(
       0,
           (sum, item) => sum + item.finalSalary,
@@ -112,6 +117,7 @@ class PayrollPdfService {
       'RD',
       'LIC',
       'TDS',
+      'Bus Fee',
       'Net Salary',
     ];
 
@@ -140,6 +146,7 @@ class PayrollPdfService {
       s.rdAmount.toStringAsFixed(0),
       s.licAmount.toStringAsFixed(0),
       s.tdsAmount.toStringAsFixed(0),
+      s.busFee.toStringAsFixed(0),
       s.finalSalary.toStringAsFixed(0),
     ];
 
@@ -323,6 +330,7 @@ class PayrollPdfService {
                 'RD',
                 'LIC',
                 'TDS',
+                'Bus Fee',
                 'Net Salary',
               ],
 
@@ -334,6 +342,7 @@ class PayrollPdfService {
                   '₹${totalRd.toStringAsFixed(0)}',
                   '₹${totalLic.toStringAsFixed(0)}',
                   '₹${totalTds.toStringAsFixed(0)}',
+                  '₹${totalBusFee.toStringAsFixed(0)}',
                   '₹${totalNetSalary.toStringAsFixed(0)}',
                 ],
               ],

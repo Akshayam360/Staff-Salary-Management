@@ -6,6 +6,7 @@ import 'package:printing/printing.dart';
 
 import '../../services/pdf/payroll_pdf_service.dart';
 import '../../services/staff_service.dart';
+import '../../services/pdf/attendance_report_pdf_service.dart';
 
 class SalaryHistoryScreen extends StatefulWidget {
   const SalaryHistoryScreen({super.key});
@@ -78,6 +79,9 @@ class _SalaryHistoryScreenState
   final PayrollPdfService payrollPdfService =
   PayrollPdfService();
 
+  final AttendanceReportPdfService attendanceReportPdfService =
+  AttendanceReportPdfService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,21 +92,44 @@ class _SalaryHistoryScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            const Text(
-              'Salary History',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            const Text(
-              'Immutable log of every salary run.',
-              style: TextStyle(
-                color: Colors.grey,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Salary History',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Immutable log of every salary run.',
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _showLeaveReportDialog,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF37474F),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 18,
+                    ),
+                  ),
+                  icon: const Icon(Icons.assessment_outlined),
+                  label: const Text('Leave Report'),
+                ),
+              ],
             ),
 
             const SizedBox(height: 30),
@@ -477,7 +504,15 @@ class _SalaryHistoryScreenState
                                       ),
 
                                       DataColumn(
+                                        label: Text('Bus Fee'),
+                                      ),
+
+                                      DataColumn(
                                         label: Text('LLP'),
+                                      ),
+
+                                      DataColumn(
+                                        label: Text('AL'),
                                       ),
 
                                       DataColumn(
@@ -548,7 +583,19 @@ class _SalaryHistoryScreenState
 
                                           DataCell(
                                             Text(
+                                              '₹${salary.busFee.toStringAsFixed(0)}',
+                                            ),
+                                          ),
+
+                                          DataCell(
+                                            Text(
                                               '${salary.llpDays}',
+                                            ),
+                                          ),
+
+                                          DataCell(
+                                            Text(
+                                              '${salary.alDays}',
                                             ),
                                           ),
                                           DataCell(Text('₹${salary.totalDeduction.toStringAsFixed(0)}')),
@@ -607,6 +654,203 @@ class _SalaryHistoryScreenState
       ),
 
     );
+  }
+
+  // -------------------------------------------------------------------
+  // LEAVE REPORT - consolidated department-wise CL / LCL / OD / LOD /
+  // LOP / LLP report for 1 month, 6 months or 1 year, as PDF or print.
+  // The period always ends at the month chosen in the dialog.
+  // -------------------------------------------------------------------
+  Future<void> _showLeaveReportDialog() async {
+    _ReportPeriod period = _ReportPeriod.oneMonth;
+    int selectedMonth = DateTime.now().month;
+    int selectedYear = DateTime.now().year;
+    final years = List.generate(11, (i) => DateTime.now().year - 5 + i);
+
+    final _ReportOutput? output = await showDialog<_ReportOutput>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Leave Report'),
+              content: SizedBox(
+                width: 380,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Department-wise consolidated leave report.',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                    const SizedBox(height: 12),
+                    RadioListTile<_ReportPeriod>(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: const Text('1 Month'),
+                      value: _ReportPeriod.oneMonth,
+                      groupValue: period,
+                      onChanged: (v) => setDialogState(() => period = v!),
+                    ),
+                    RadioListTile<_ReportPeriod>(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: const Text('Last 6 Months'),
+                      value: _ReportPeriod.sixMonths,
+                      groupValue: period,
+                      onChanged: (v) => setDialogState(() => period = v!),
+                    ),
+                    RadioListTile<_ReportPeriod>(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: const Text('Last 1 Year'),
+                      value: _ReportPeriod.oneYear,
+                      groupValue: period,
+                      onChanged: (v) => setDialogState(() => period = v!),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      period == _ReportPeriod.oneMonth
+                          ? 'Month'
+                          : 'Period ends at',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButton<int>(
+                            isExpanded: true,
+                            value: selectedMonth,
+                            items: List.generate(
+                              12,
+                                  (i) => DropdownMenuItem(
+                                value: i + 1,
+                                // monthFilters[0] is 'All', so index i+1
+                                // lines up with month number i+1.
+                                child: Text(monthFilters[i + 1]),
+                              ),
+                            ),
+                            onChanged: (v) =>
+                                setDialogState(() => selectedMonth = v!),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DropdownButton<int>(
+                            isExpanded: true,
+                            value: selectedYear,
+                            items: years
+                                .map((y) => DropdownMenuItem(
+                                value: y, child: Text('$y')))
+                                .toList(),
+                            onChanged: (v) =>
+                                setDialogState(() => selectedYear = v!),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      Navigator.pop(dialogContext, _ReportOutput.pdf),
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('PDF'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () =>
+                      Navigator.pop(dialogContext, _ReportOutput.print),
+                  icon: const Icon(Icons.print),
+                  label: const Text('Print'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (output == null) return;
+
+    await _generateLeaveReport(period, selectedMonth, selectedYear, output);
+  }
+
+  Future<void> _generateLeaveReport(
+      _ReportPeriod period,
+      int endMonth,
+      int endYear,
+      _ReportOutput output,
+      ) async {
+    try {
+      final monthsCount = switch (period) {
+        _ReportPeriod.oneMonth => 1,
+        _ReportPeriod.sixMonths => 6,
+        _ReportPeriod.oneYear => 12,
+      };
+
+      // DateTime normalises a month below 1 into the previous year,
+      // so this walks back across the year boundary correctly.
+      final Set<String> monthLabels = {};
+      for (int i = 0; i < monthsCount; i++) {
+        final d = DateTime(endYear, endMonth - i, 1);
+        monthLabels.add('${monthFilters[d.month]} ${d.year}');
+      }
+
+      final start = DateTime(endYear, endMonth - (monthsCount - 1), 1);
+      final startLabel = '${monthFilters[start.month]} ${start.year}';
+      final endLabel = '${monthFilters[endMonth]} $endYear';
+      final periodLabel =
+      monthsCount == 1 ? endLabel : '$startLabel to $endLabel';
+
+      final allRecords = await salaryHistoryService.getSalaryHistory().first;
+      final staffs = await staffService.getStaffs().first;
+
+      final records = allRecords
+          .where((s) => monthLabels.contains(s.month.trim()))
+          .toList();
+
+      if (records.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('No salary records found for $periodLabel'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      final pdf = await attendanceReportPdfService.generateConsolidatedReport(
+        periodLabel: periodLabel,
+        staffs: staffs,
+        records: records,
+      );
+
+      if (output == _ReportOutput.pdf) {
+        await Printing.sharePdf(
+          bytes: pdf,
+          filename: 'Leave Report - $periodLabel.pdf',
+        );
+      } else {
+        await Printing.layoutPdf(
+          onLayout: (_) async => pdf,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
   Future<void> showDeleteDialog(
@@ -1000,3 +1244,7 @@ class _SalaryHistoryScreenState
 }
 
 enum _ClearHistoryScope { all, year, month }
+
+enum _ReportPeriod { oneMonth, sixMonths, oneYear }
+
+enum _ReportOutput { pdf, print }
